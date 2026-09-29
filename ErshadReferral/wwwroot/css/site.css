@@ -1,0 +1,963 @@
+/* ===== CSS Variables ===== */
+:root {
+    --primary-gradient: linear-gradient(135deg, #1a237e 0%, #0d47a1 50%, #01579b 100%);
+    --primary-dark: #1a237e;
+    --primary-medium: #0d47a1;
+    --primary-light: #1565c0;
+    --accent-color: #00bcd4;
+    --accent-glow: rgba(0, 188, 212, 0.3);
+    --surface-color: #ffffff;
+    --background-color: #f0f2f5;
+    --card-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    --card-hover-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    --text-primary: #1a1a2e;
+    --text-secondary: #6c757d;
+    --border-radius: 12px;
+    --transition-speed: 0.3s;
+}
+
+/* ===== Base Styles ===== */
+html {
+    font-size: 14px;
+}
+
+@media (min-width: 768px) {
+    html {
+        font-size: 15px;
+    }
+}
+
+html {
+    position: relative;
+    min-height: 100%;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-primary);
+    padding-top: 70px;
+    min-height: 100vh;
+    direction: rtl;
+}
+
+/* ===== Focus Styles ===== */
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+    box-shadow: 0 0 0 0.2rem var(--accent-glow);
+    border-color: var(--accent-color);
+}
+
+/* ===== Navigation Bar ===== */
+.main-nav {
+    background: var(--primary-gradient);
+    border: none;
+    padding: 0.6rem 0;
+    z-index: 1050;
+}
+
+.main-nav .navbar-brand {
+    font-size: 1.15rem;
+    letter-spacing: 0.5px;
+}
+
+.main-nav .brand-text {
+    background: linear-gradient(to left, #e3f2fd, #ffffff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.main-nav .nav-link {
+    color: rgba(255, 255, 255, 0.85) !important;
+    font-size: 0.9rem;
+    border-radius: 8px;
+    transition: all var(--transition-speed) ease;
+    margin: 0 2px;
+}
+
+.main-nav .nav-link:hover,
+.main-nav .nav-link.active {
+    color: #ffffff !important;
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.main-nav .dropdown-menu {
+    border: none;
+    border-radius: var(--border-radius);
+    padding: 0.5rem;
+    animation: slideDown 0.2s ease;
+}
+
+.main-nav .dropdown-item {
+    border-radius: 8px;
+    padding: 0.6rem 1rem;
+    transition: all var(--transition-speed) ease;
+}
+
+.main-nav .dropdown-item:hover {
+    background: linear-gradient(to left, #e3f2fd, #f5f5f5);
+    color: var(--primary-dark);
+    transform: translateX(-4px);
+}
+
+.user-badge {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+}
+
+.user-avatar i {
+    font-size: 1.4rem;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* ===== Main Content ===== */
+.main-content {
+    padding-top: 1rem;
+    padding-bottom: 80px;
+}
+
+/* ===== Page Header ===== */
+.page-header {
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.06);
+}
+
+.page-header h4 {
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0;
+}
+
+/* ===== Cards ===== */
+.card {
+    border: none;
+    border-radius: var(--border-radius);
+    box-shadow: var(--card-shadow);
+    transition: all var(--transition-speed) ease;
+    overflow: hidden;
+}
+
+.card:hover {
+    box-shadow: var(--card-hover-shadow);
+}
+
+.card-header {
+    background: transparent;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    padding: 1rem 1.25rem;
+    font-weight: 600;
+}
+
+.card-header h5, .card-header h6 {
+    margin-bottom: 0;
+}
+
+/* ===== Dashboard Stats Cards ===== */
+.stat-card {
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    text-align: center;
+    transition: all var(--transition-speed) ease;
+    border: none;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    transition: all var(--transition-speed) ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--card-hover-shadow);
+}
+
+.stat-card:hover::before {
+    transform: scale(1.5);
+}
+
+.stat-card .stat-icon {
+    font-size: 2.5rem;
+    opacity: 0.3;
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+}
+
+.stat-card .stat-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+}
+
+.stat-card .stat-label {
+    font-size: 0.9rem;
+    opacity: 0.9;
+    font-weight: 500;
+}
+
+.stat-card.bg-gradient-primary {
+    background: linear-gradient(135deg, #1a237e, #1565c0);
+    color: white;
+}
+
+.stat-card.bg-gradient-info {
+    background: linear-gradient(135deg, #006064, #00acc1);
+    color: white;
+}
+
+.stat-card.bg-gradient-warning {
+    background: linear-gradient(135deg, #e65100, #ff9800);
+    color: white;
+}
+
+.stat-card.bg-gradient-success {
+    background: linear-gradient(135deg, #1b5e20, #43a047);
+    color: white;
+}
+
+/* ===== Tables ===== */
+.table {
+    margin-bottom: 0;
+    border-radius: var(--border-radius);
+}
+
+.table thead th {
+    background: var(--primary-dark);
+    color: white;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 0.9rem 1rem;
+    border: none;
+}
+
+.table tbody td {
+    padding: 0.8rem 1rem;
+    vertical-align: middle;
+    border-color: rgba(0, 0, 0, 0.04);
+    font-size: 0.9rem;
+}
+
+.table-hover tbody tr {
+    transition: all var(--transition-speed) ease;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 188, 212, 0.04);
+    transform: scale(1.005);
+}
+
+.table-responsive {
+    border-radius: var(--border-radius);
+}
+
+/* ===== Badges ===== */
+.badge {
+    font-weight: 500;
+    padding: 0.4em 0.8em;
+    border-radius: 6px;
+    font-size: 0.78rem;
+}
+
+/* ===== Buttons ===== */
+.btn {
+    border-radius: 8px;
+    font-weight: 500;
+    padding: 0.45rem 1.2rem;
+    transition: all var(--transition-speed) ease;
+    font-size: 0.9rem;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #1a237e, #1565c0);
+    border: none;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #0d47a1, #1976d2);
+    box-shadow: 0 4px 15px rgba(26, 35, 126, 0.3);
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #1b5e20, #2e7d32);
+    border: none;
+}
+
+.btn-success:hover {
+    background: linear-gradient(135deg, #2e7d32, #388e3c);
+    box-shadow: 0 4px 15px rgba(27, 94, 32, 0.3);
+}
+
+.btn-warning {
+    background: linear-gradient(135deg, #e65100, #f57c00);
+    border: none;
+    color: white;
+}
+
+.btn-warning:hover {
+    background: linear-gradient(135deg, #f57c00, #ff9800);
+    box-shadow: 0 4px 15px rgba(230, 81, 0, 0.3);
+}
+
+.btn-outline-primary {
+    border-color: var(--primary-medium);
+    color: var(--primary-medium);
+}
+
+.btn-outline-primary:hover {
+    background: var(--primary-medium);
+    border-color: var(--primary-medium);
+    box-shadow: 0 4px 15px rgba(13, 71, 161, 0.2);
+}
+
+.btn-outline-secondary {
+    border-color: #adb5bd;
+}
+
+.btn-outline-secondary:hover {
+    background: #6c757d;
+    border-color: #6c757d;
+}
+
+.btn-sm {
+    padding: 0.3rem 0.7rem;
+    font-size: 0.82rem;
+    border-radius: 6px;
+}
+
+/* ===== Forms ===== */
+.form-control, .form-select {
+    border-radius: 8px;
+    padding: 0.55rem 0.85rem;
+    border: 1.5px solid #e0e0e0;
+    transition: all var(--transition-speed) ease;
+    font-size: 0.9rem;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.form-label {
+    font-weight: 500;
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.4rem;
+}
+
+/* ===== Alerts ===== */
+.alert-professional {
+    border: none;
+    border-radius: var(--border-radius);
+    padding: 1rem 1.25rem;
+    margin-top: 0.5rem;
+    animation: slideDown 0.3s ease;
+}
+
+.alert-professional.alert-success {
+    background: linear-gradient(to left, #e8f5e9, #f1f8e9);
+    border-right: 4px solid #43a047;
+    color: #1b5e20;
+}
+
+.alert-professional.alert-danger {
+    background: linear-gradient(to left, #fce4ec, #ffebee);
+    border-right: 4px solid #e53935;
+    color: #b71c1c;
+}
+
+/* ===== Login Card ===== */
+.login-card {
+    border: none;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+}
+
+.login-header {
+    background: var(--primary-gradient);
+    color: white;
+    padding: 2rem;
+    text-align: center;
+}
+
+.login-body {
+    padding: 2rem;
+    background: white;
+}
+
+/* ===== Quick Action Button (Dashboard) ===== */
+.quick-action-btn {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    border-radius: var(--border-radius);
+    background: var(--surface-color);
+    border: 1.5px solid rgba(0, 0, 0, 0.06);
+    text-decoration: none;
+    color: var(--text-primary);
+    transition: all var(--transition-speed) ease;
+}
+
+.quick-action-btn:hover {
+    border-color: var(--accent-color);
+    box-shadow: 0 4px 20px rgba(0, 188, 212, 0.15);
+    transform: translateY(-2px);
+    color: var(--text-primary);
+}
+
+.quick-action-btn i {
+    font-size: 1.8rem;
+    color: var(--primary-medium);
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #e3f2fd, #f5f5f5);
+    flex-shrink: 0;
+}
+
+/* ===== Animations ===== */
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+}
+
+/* ===== Footer ===== */
+.footer-professional {
+    background: var(--surface-color);
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+    padding: 1rem 0;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    z-index: 1000;
+}
+
+/* ===== No Print ===== */
+@media print {
+    .no-print {
+        display: none !important;
+    }
+}
+
+/* =========================================================
+   OFFICE MANAGER - BIG ACTION BUTTONS
+   ========================================================= */
+
+/* --- Action Button Container --- */
+.office-actions {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    max-width: 700px;
+    margin: 0 auto 2rem auto;
+}
+
+@media (max-width: 576px) {
+    .office-actions {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+}
+
+/* --- Individual Big Action Button --- */
+.office-action-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 2.5rem 1.5rem;
+    border-radius: 20px;
+    text-decoration: none;
+    color: white;
+    font-weight: 700;
+    font-size: 1.3rem;
+    text-align: center;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    border: none;
+    cursor: pointer;
+    min-height: 200px;
+}
+
+.office-action-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 30% 20%, rgba(255,255,255,0.15) 0%, transparent 60%);
+    transition: all 0.3s ease;
+}
+
+.office-action-btn:hover {
+    transform: translateY(-6px) scale(1.02);
+    color: white;
+    text-decoration: none;
+}
+
+.office-action-btn:active {
+    transform: translateY(-2px) scale(0.98);
+}
+
+.office-action-btn .action-icon {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.8rem;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.office-action-btn:hover .action-icon {
+    background: rgba(255, 255, 255, 0.35);
+    transform: scale(1.1);
+}
+
+.office-action-btn .action-label {
+    font-size: 1.4rem;
+    font-weight: 800;
+    line-height: 1.2;
+}
+
+.office-action-btn .action-sublabel {
+    font-size: 0.85rem;
+    font-weight: 400;
+    opacity: 0.85;
+}
+
+/* Entry button (green gradient) */
+.office-action-btn.btn-entry {
+    background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 40%, #43a047 100%);
+    box-shadow: 0 8px 32px rgba(27, 94, 32, 0.35);
+}
+
+.office-action-btn.btn-entry:hover {
+    box-shadow: 0 12px 40px rgba(27, 94, 32, 0.5);
+}
+
+.office-action-btn.btn-entry::after {
+    content: '';
+    position: absolute;
+    bottom: -30%;
+    left: -20%;
+    width: 140%;
+    height: 60%;
+    background: radial-gradient(ellipse, rgba(255,255,255,0.08) 0%, transparent 70%);
+}
+
+/* Exit button (orange/red gradient) */
+.office-action-btn.btn-exit {
+    background: linear-gradient(135deg, #e65100 0%, #f57c00 40%, #ff9800 100%);
+    box-shadow: 0 8px 32px rgba(230, 81, 0, 0.35);
+}
+
+.office-action-btn.btn-exit:hover {
+    box-shadow: 0 12px 40px rgba(230, 81, 0, 0.5);
+}
+
+.office-action-btn.btn-exit::after {
+    content: '';
+    position: absolute;
+    bottom: -30%;
+    left: -20%;
+    width: 140%;
+    height: 60%;
+    background: radial-gradient(ellipse, rgba(255,255,255,0.08) 0%, transparent 70%);
+}
+
+/* --- Office Manager Welcome Banner --- */
+.office-welcome {
+    text-align: center;
+    padding: 1.5rem 1rem 0.5rem;
+}
+
+.office-welcome .welcome-icon {
+    font-size: 3rem;
+    color: var(--primary-medium);
+    margin-bottom: 0.5rem;
+}
+
+.office-welcome h3 {
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.office-welcome .branch-name {
+    font-size: 1.1rem;
+    color: var(--primary-medium);
+    font-weight: 600;
+}
+
+.office-welcome .welcome-date {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-top: 0.25rem;
+}
+
+/* --- Today's Visitors Quick List for Office Manager --- */
+.office-visitor-list {
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.office-visitor-list .card {
+    border-radius: 16px;
+}
+
+.office-visitor-list .visitor-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    transition: background 0.2s ease;
+}
+
+.office-visitor-list .visitor-item:last-child {
+    border-bottom: none;
+}
+
+.office-visitor-list .visitor-item:hover {
+    background: rgba(0, 188, 212, 0.03);
+}
+
+.office-visitor-list .visitor-info {
+    flex: 1;
+}
+
+.office-visitor-list .visitor-name {
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--text-primary);
+}
+
+.office-visitor-list .visitor-meta {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    margin-top: 2px;
+}
+
+.office-visitor-list .visitor-status {
+    flex-shrink: 0;
+    margin-left: 1rem;
+}
+
+.office-visitor-list .btn-exit-visitor,
+.office-visitor-list .btn-arrival-visitor {
+    padding: 0.85rem 1.8rem;
+    border-radius: 14px;
+    font-weight: 700;
+    font-size: 1.15rem;
+    color: white;
+    border: none;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    cursor: pointer;
+    min-height: 52px;
+    min-width: 160px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.office-visitor-list .btn-exit-visitor:active,
+.office-visitor-list .btn-arrival-visitor:active {
+    transform: scale(0.96);
+}
+
+.office-visitor-list .visitor-item {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+    padding: 1.25rem;
+}
+
+.office-visitor-list .visitor-status {
+    margin-left: 0;
+    width: 100%;
+}
+
+.office-visitor-list .visitor-status button {
+    width: 100%;
+    padding: 1rem;
+    font-size: 1.2rem;
+    min-height: 56px;
+}
+
+@media (min-width: 576px) {
+    .office-visitor-list .visitor-item {
+        flex-direction: row;
+        align-items: center;
+    }
+    .office-visitor-list .visitor-status {
+        margin-left: 1rem;
+        width: auto;
+    }
+    .office-visitor-list .visitor-status button {
+        width: auto;
+    }
+}
+
+.office-visitor-list .btn-exit-visitor {
+    background: linear-gradient(135deg, #1b5e20, #43a047);
+}
+
+.office-visitor-list .btn-exit-visitor:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(27, 94, 32, 0.3);
+}
+
+.office-visitor-list .btn-arrival-visitor {
+    background: linear-gradient(135deg, #e65100, #ff9800);
+}
+
+.office-visitor-list .btn-arrival-visitor:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(230, 81, 0, 0.3);
+}
+
+/* --- Empty State for Office Manager --- */
+.office-empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+}
+
+.office-empty-state .empty-icon {
+    font-size: 4rem;
+    color: #ccc;
+    margin-bottom: 1rem;
+}
+
+.office-empty-state p {
+    color: var(--text-secondary);
+    font-size: 1.05rem;
+    margin-bottom: 0.5rem;
+}
+
+/* =========================================================
+   VISITOR ENTRY FORM - TOUCH FRIENDLY
+   ========================================================= */
+
+.touch-form .form-control,
+.touch-form .form-select {
+    padding: 0.75rem 1rem;
+    font-size: 1.05rem;
+    min-height: 50px;
+}
+
+.touch-form .form-label {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.touch-form .form-label i {
+    margin-left: 0.4rem;
+}
+
+.touch-form .submit-btn {
+    padding: 1rem 2rem;
+    font-size: 1.15rem;
+    font-weight: 700;
+    border-radius: 14px;
+    min-height: 56px;
+    width: 100%;
+}
+
+.touch-form .form-card {
+    border-radius: 16px;
+}
+
+.touch-form .form-card .card-header {
+    background: linear-gradient(135deg, #e8f5e9, #f1f8e9);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    padding: 1.25rem 1.5rem;
+}
+
+.touch-form .form-card .card-header h6 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #1b5e20;
+}
+
+.touch-form .form-card .card-body {
+    padding: 1.5rem;
+}
+
+/* --- Time Display for Form --- */
+.time-display {
+    background: linear-gradient(135deg, #e3f2fd, #f5f5f5);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    text-align: center;
+    border: 1.5px solid rgba(0, 0, 0, 0.06);
+}
+
+.time-display .time-value {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--primary-dark);
+    direction: ltr;
+}
+
+.time-display .time-label {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-top: 0.25rem;
+}
+
+/* =========================================================
+   MOBILE RESPONSIVE ADJUSTMENTS
+   ========================================================= */
+
+@media (max-width: 768px) {
+    body {
+        padding-top: 60px;
+    }
+
+    .stat-card {
+        padding: 1.2rem;
+    }
+
+    .stat-card .stat-number {
+        font-size: 2rem;
+    }
+
+    .office-action-btn {
+        padding: 2rem 1.25rem;
+        min-height: 160px;
+    }
+
+    .office-action-btn .action-icon {
+        width: 70px;
+        height: 70px;
+        font-size: 2.2rem;
+    }
+
+    .office-action-btn .action-label {
+        font-size: 1.2rem;
+    }
+
+    .office-visitor-list .visitor-status button {
+        padding: 0.75rem 1.5rem;
+        font-size: 1.1rem;
+        min-height: 50px;
+    }
+}
+
+@media (max-width: 480px) {
+    .page-header h4 {
+        font-size: 1.1rem;
+    }
+
+    .office-action-btn {
+        padding: 1.75rem 1rem;
+        min-height: 140px;
+        border-radius: 16px;
+    }
+
+    .office-action-btn .action-icon {
+        width: 60px;
+        height: 60px;
+        font-size: 1.8rem;
+    }
+
+    .office-action-btn .action-label {
+        font-size: 1.1rem;
+    }
+
+    .office-welcome h3 {
+        font-size: 1.2rem;
+    }
+
+    .office-visitor-list .btn-exit-visitor,
+    .office-visitor-list .btn-arrival-visitor {
+        padding: 0.9rem 1.5rem;
+        font-size: 1.1rem;
+        min-height: 54px;
+    }
+}
+
+/* =========================================================
+   SCROLLBAR STYLING
+   ========================================================= */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #bbb;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #999;
+}

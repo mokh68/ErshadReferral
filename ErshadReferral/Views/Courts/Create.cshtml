@@ -1,0 +1,70 @@
+@model Court
+@{
+    ViewData["Title"] = "افزودن دادگاه";
+}
+
+<div class="page-header animate-fade-in">
+    <h4><i class="bi bi-plus-circle ms-2"></i>افزودن دادگاه جدید</h4>
+</div>
+
+<div class="row justify-content-center animate-fade-in">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-bank ms-2 text-success"></i>اطلاعات دادگاه</h6>
+            </div>
+            <div class="card-body">
+                <form asp-action="Create" method="post">
+                    <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="Name" class="form-label">
+                            <i class="bi bi-card-heading ms-1"></i>نام دادگاه
+                        </label>
+                        <input asp-for="Name" class="form-control" autofocus />
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="CourtType" class="form-label">
+                            <i class="bi bi-tag ms-1"></i>نوع دادگاه
+                        </label>
+                        <select asp-for="CourtType" class="form-select" asp-items="Html.GetEnumSelectList<CourtType>()">
+                        </select>
+                        <span asp-validation-for="CourtType" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Address" class="form-label">
+                            <i class="bi bi-geo-alt ms-1"></i>آدرس
+                        </label>
+                        <textarea asp-for="Address" class="form-control" rows="2"></textarea>
+                        <span asp-validation-for="Address" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Phone" class="form-label">
+                            <i class="bi bi-telephone ms-1"></i>تلفن
+                        </label>
+                        <input asp-for="Phone" class="form-control" />
+                        <span asp-validation-for="Phone" class="text-danger"></span>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input asp-for="IsActive" class="form-check-input" />
+                        <label asp-for="IsActive" class="form-check-label">فعال</label>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-check-circle ms-1"></i>ذخیره
+                        </button>
+                        <a asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-right ms-1"></i>بازگشت
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

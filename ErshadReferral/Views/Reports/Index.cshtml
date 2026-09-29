@@ -1,0 +1,338 @@
+@model IEnumerable<BranchReportRow>
+@{
+    ViewData["Title"] = "گزارش‌ها";
+    var fromDate = ViewBag.FromDate as string ?? "";
+    var toDate = ViewBag.ToDate as string ?? "";
+    var total = ViewBag.Total as int? ?? 0;
+    var byStatus = ViewBag.ByStatus as Dictionary<ReferralStatus, int> ?? new();
+    var waitingTimeByBranch = ViewBag.WaitingTimeByBranch as List<WaitingTimeReportRow> ?? new();
+    var avgWaitMinutes = ViewBag.AvgWaitMinutes as double? ?? 0;
+    var totalVisitorsWithArrival = ViewBag.TotalVisitorsWithArrival as int? ?? 0;
+}
+
+<div class="page-header animate-fade-in">
+    <h4><i class="bi bi-bar-chart-line ms-2"></i>گزارش‌ها</h4>
+</div>
+
+<!-- Date Filter -->
+<div class="card mb-4 animate-fade-in">
+    <div class="card-header">
+        <h6 class="mb-0"><i class="bi bi-funnel ms-2"></i>فیلتر زمانی</h6>
+    </div>
+    <div class="card-body">
+        <form asp-action="Index" method="get" class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label">
+                    <i class="bi bi-calendar3 ms-1"></i>از تاریخ
+                </label>
+                <input type="text" name="fromDate" value="@fromDate" class="form-control" placeholder="1403/01/01" dir="ltr" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">
+                    <i class="bi bi-calendar3 ms-1"></i>تا تاریخ
+                </label>
+                <input type="text" name="toDate" value="@toDate" class="form-control" placeholder="1403/12/29" dir="ltr" />
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-search ms-1"></i>نمایش گزارش
+                </button>
+                <a asp-action="Index" class="btn btn-outline-secondary">
+                    <i class="bi bi-x-circle ms-1"></i>پیش‌فرض
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Summary -->
+<div class="row g-3 mb-4 animate-fade-in">
+    <div class="col-md-3 col-sm-6">
+        <div class="stat-card bg-gradient-primary">
+            <i class="bi bi-folder2-open stat-icon"></i>
+            <div class="stat-number">@total</div>
+            <div class="stat-label">کل ارجاعات</div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="stat-card bg-gradient-warning">
+            <i class="bi bi-clock-history stat-icon"></i>
+            <div class="stat-number">@(byStatus.GetValueOrDefault(ReferralStatus.Referred) + byStatus.GetValueOrDefault(ReferralStatus.Received) + byStatus.GetValueOrDefault(ReferralStatus.InProgress))</div>
+            <div class="stat-label">باز</div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="stat-card bg-gradient-success">
+            <i class="bi bi-check-circle stat-icon"></i>
+            <div class="stat-number">@byStatus.GetValueOrDefault(ReferralStatus.Closed)</div>
+            <div class="stat-label">مختومه</div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="stat-card" style="background: linear-gradient(135deg, #546e7a, #78909c); color: white;">
+            <i class="bi bi-arrow-return-left stat-icon"></i>
+            <div class="stat-number">@(byStatus.GetValueOrDefault(ReferralStatus.ReturnedToErshad) + byStatus.GetValueOrDefault(ReferralStatus.Cancelled))</div>
+            <div class="stat-label">برگشتی / ابطال‌شده</div>
+        </div>
+    </div>
+</div>
+
+<!-- Branch Referral Table -->
+<div class="card mb-4 animate-fade-in">
+    <div class="card-header">
+        <h6 class="mb-0"><i class="bi bi-table ms-2"></i>آمار ارجاعات بر اساس شعبه</h6>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>شعبه</th>
+                        <th class="text-center">کل</th>
+                        <th class="text-center">باز</th>
+                        <th class="text-center">مختومه</th>
+                        <th class="text-center">برگشتی</th>
+                        <th class="text-center">ابطال‌شده</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{ var i = 1; }
+                    @foreach (var row in Model)
+                    {
+                        <tr>
+                            <td>@i</td>
+                            <td><strong>@row.BranchName</strong></td>
+                            <td class="text-center fw-bold text-primary">@row.Total</td>
+                            <td class="text-center">
+                                <span class="badge bg-warning text-dark">@row.Open</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-success">@row.Closed</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-secondary">@row.Returned</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-danger">@row.Cancelled</span>
+                            </td>
+                        </tr>
+                        i++;
+                    }
+                </tbody>
+                <tfoot>
+                    <tr class="table-warning fw-bold">
+                        <td colspan="2">
+                            <i class="bi bi-calculator ms-1"></i>جمع کل
+                        </td>
+                        <td class="text-center">@Model.Sum(x => x.Total)</td>
+                        <td class="text-center">@Model.Sum(x => x.Open)</td>
+                        <td class="text-center">@Model.Sum(x => x.Closed)</td>
+                        <td class="text-center">@Model.Sum(x => x.Returned)</td>
+                        <td class="text-center">@Model.Sum(x => x.Cancelled)</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+        @if (!Model.Any())
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-bar-chart fs-1 text-muted"></i>
+                <p class="text-muted mt-3">داده‌ای برای نمایش وجود ندارد.</p>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- ==================== میانگین معطلی مراجعان به تفکیک شعبه ==================== -->
+<div class="card mb-4 animate-fade-in">
+    <div class="card-header" style="background:linear-gradient(to left,#e8f5e9,#f1f8e9);border-bottom:2px solid rgba(27,94,32,0.15);">
+        <h6 class="mb-0" style="color:#1b5e20;">
+            <i class="bi bi-clock-history ms-2"></i>
+            میانگین معطلی مراجعان به تفکیک شعبه
+        </h6>
+    </div>
+    <div class="card-body">
+        <!-- Overall summary -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="p-3 rounded-3 text-center" style="background:linear-gradient(135deg,#e8f5e9,#f5f5f5);">
+                    <i class="bi bi-people fs-2 text-success"></i>
+                    <div class="mt-2 fw-bold fs-4">@totalVisitorsWithArrival</div>
+                    <div class="text-muted">کل مراجعان (با حضور تأیید شده)</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="p-3 rounded-3 text-center" style="background:linear-gradient(135deg,#fff3e0,#f5f5f5);">
+                    <i class="bi bi-hourglass-split fs-2 text-warning"></i>
+                    <div class="mt-2 fw-bold fs-4">
+                        @{
+                            var avgHours = (int)avgWaitMinutes / 60;
+                            var avgMins = (int)avgWaitMinutes % 60;
+                        }
+                        @if (avgHours > 0)
+                        {
+                            <span>@avgHours ساعت و @avgMins دقیقه</span>
+                        }
+                        else
+                        {
+                            <span>@avgMins دقیقه</span>
+                        }
+                    </div>
+                    <div class="text-muted">میانگین معطلی کل</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="p-3 rounded-3 text-center" style="background:linear-gradient(135deg,#e3f2fd,#f5f5f5);">
+                    <i class="bi bi-building fs-2 text-primary"></i>
+                    <div class="mt-2 fw-bold fs-4">@waitingTimeByBranch.Count</div>
+                    <div class="text-muted">شعبه‌های فعال</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Waiting time table -->
+        @if (waitingTimeByBranch.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>شعبه</th>
+                            <th class="text-center">تعداد مراجعان</th>
+                            <th class="text-center">
+                                <i class="bi bi-clock ms-1"></i>میانگین معطلی
+                            </th>
+                            <th class="text-center">
+                                <i class="bi bi-clock-history ms-1"></i>کمترین معطلی
+                            </th>
+                            <th class="text-center">
+                                <i class="bi bi-clock-fill ms-1"></i>بیشترین معطلی
+                            </th>
+                            <th class="text-center">وضعیت</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{ var j = 1; }
+                        @foreach (var row in waitingTimeByBranch)
+                        {
+                            var avgH = (int)row.AvgWaitMinutes / 60;
+                            var avgM = (int)row.AvgWaitMinutes % 60;
+                            var minH = row.MinWaitMinutes / 60;
+                            var minM = row.MinWaitMinutes % 60;
+                            var maxH = row.MaxWaitMinutes / 60;
+                            var maxM = row.MaxWaitMinutes % 60;
+
+                            string rowClass, badgeClass, label;
+                            if (row.AvgWaitMinutes < 60)
+                            {
+                                rowClass = "";
+                                badgeClass = "bg-success";
+                                label = "عالی";
+                            }
+                            else if (row.AvgWaitMinutes < 180)
+                            {
+                                rowClass = "";
+                                badgeClass = "bg-warning text-dark";
+                                label = "قابل قبول";
+                            }
+                            else
+                            {
+                                rowClass = "table-danger";
+                                badgeClass = "bg-danger";
+                                label = "نیاز به بهبود";
+                            }
+
+                            <tr class="@rowClass">
+                                <td>@j</td>
+                                <td><strong>@row.BranchName</strong></td>
+                                <td class="text-center fw-bold">@row.TotalCount</td>
+                                <td class="text-center fw-bold" style="font-size:1.05rem;">
+                                    @if (avgH > 0)
+                                    {
+                                        <span>@avgH:@avgM.ToString("D2")</span>
+                                        <small class="text-muted"> ساعت</small>
+                                    }
+                                    else
+                                    {
+                                        <span>@avgM</span>
+                                        <small class="text-muted"> دقیقه</small>
+                                    }
+                                </td>
+                                <td class="text-center text-muted">
+                                    @if (minH > 0)
+                                    {
+                                        <span>@minH:@minM.ToString("D2") ساعت</span>
+                                    }
+                                    else
+                                    {
+                                        <span>@minM دقیقه</span>
+                                    }
+                                </td>
+                                <td class="text-center text-muted">
+                                    @if (maxH > 0)
+                                    {
+                                        <span>@maxH:@maxM.ToString("D2") ساعت</span>
+                                    }
+                                    else
+                                    {
+                                        <span>@maxM دقیقه</span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge @badgeClass">@label</span>
+                                </td>
+                            </tr>
+                            j++;
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Simple visual bar chart -->
+            <div class="mt-4">
+                <h6 class="mb-3" style="color:#1b5e20;">
+                    <i class="bi bi-bar-chart ms-1"></i>نمودار میانگین معطلی
+                </h6>
+                @{
+                    var maxAvg = waitingTimeByBranch.Max(x => x.AvgWaitMinutes);
+                }
+                @foreach (var row in waitingTimeByBranch)
+                {
+                    var avgH = (int)row.AvgWaitMinutes / 60;
+                    var avgM = (int)row.AvgWaitMinutes % 60;
+                    var barPercent = maxAvg > 0 ? (row.AvgWaitMinutes / maxAvg * 100) : 0;
+                    var barColor = row.AvgWaitMinutes < 60 ? "#4caf50" : row.AvgWaitMinutes < 180 ? "#ff9800" : "#f44336";
+
+                    <div class="mb-2">
+                        <div class="d-flex justify-content-between mb-1">
+                            <small class="fw-semibold">@row.BranchName</small>
+                            <small class="text-muted">
+                                @if (avgH > 0)
+                                {
+                                    <span>@avgH:@avgM.ToString("D2") ساعت</span>
+                                }
+                                else
+                                {
+                                    <span>@avgM دقیقه</span>
+                                }
+                            </small>
+                        </div>
+                        <div style="background:#e0e0e0;border-radius:6px;height:22px;overflow:hidden;">
+                            <div style="width:@barPercent.ToString("F0")%;background:@barColor;height:100%;border-radius:6px;transition:width 0.5s;"></div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-4">
+                <i class="bi bi-clock-history fs-1 text-muted"></i>
+                <p class="text-muted mt-3">داده‌ای برای محاسبه معطلی وجود ندارد.</p>
+                <small class="text-muted">مراجعانی که حضورشان تأیید شده باشد در این گزارش نمایش داده می‌شوند.</small>
+            </div>
+        }
+    </div>
+</div>

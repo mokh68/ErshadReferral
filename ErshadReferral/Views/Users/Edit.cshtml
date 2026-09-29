@@ -1,0 +1,169 @@
+@model UserFormViewModel
+@{
+    ViewData["Title"] = "ویرایش کاربر";
+}
+
+<div class="page-header animate-fade-in">
+    <h4><i class="bi bi-pencil ms-2"></i>ویرایش کاربر: @Model.UserName</h4>
+</div>
+
+<div class="row justify-content-center animate-fade-in">
+    <div class="col-md-7">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-person-gear ms-2 text-primary"></i>اطلاعات کاربر</h6>
+            </div>
+            <div class="card-body">
+                <form asp-action="Edit" method="post">
+                    <input type="hidden" asp-for="Id" />
+                    <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="UserName" class="form-label">
+                                <i class="bi bi-person ms-1"></i>نام کاربری
+                            </label>
+                            <input asp-for="UserName" class="form-control" />
+                            <span asp-validation-for="UserName" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="FullName" class="form-label">
+                                <i class="bi bi-person-badge ms-1"></i>نام و نام خانوادگی
+                            </label>
+                            <input asp-for="FullName" class="form-control" />
+                            <span asp-validation-for="FullName" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="Role" class="form-label">
+                                <i class="bi bi-shield ms-1"></i>نقش کاربری
+                            </label>
+                            <select asp-for="Role" asp-items="ViewBag.Roles" class="form-select">
+                                <option value="">-- انتخاب نقش --</option>
+                            </select>
+                            <span asp-validation-for="Role" class="text-danger"></span>
+                            <small class="text-muted">نقش تعیین می‌کند کاربر به چه بخش‌هایی دسترسی دارد</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="BranchId" class="form-label">
+                                <i class="bi bi-door-open ms-1"></i>شعبه
+                            </label>
+                            <select asp-for="BranchId" asp-items="ViewBag.Branches" class="form-select">
+                                <option value="">-- انتخاب شعبه --</option>
+                            </select>
+                            <span asp-validation-for="BranchId" class="text-danger"></span>
+                            <small class="text-muted">برای نقش‌های «کاربر شعبه» و «مدیر دفتر» الزامی است</small>
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <div class="mb-3">
+                        <label asp-for="Password" class="form-label">
+                            <i class="bi bi-lock ms-1"></i>رمز عبور جدید
+                        </label>
+                        <input asp-for="Password" class="form-control" placeholder="خالی بگذارید بدون تغییر" />
+                        <span asp-validation-for="Password" class="text-danger"></span>
+                        <small class="text-muted">
+                            <i class="bi bi-info-circle ms-1"></i>
+                            در صورت وارد کردن رمز عبور جدید، رمز قبلی بازنشانی می‌شود.
+                            برای بازنشانی سریع از دکمه «بازنشانی رمز» در لیست کاربران استفاده کنید.
+                        </small>
+                    </div>
+
+                    <div class="form-check mb-3">
+                        <input asp-for="IsActive" class="form-check-input" />
+                        <label asp-for="IsActive" class="form-check-label">
+                            <i class="bi bi-toggle-on ms-1"></i>فعال
+                        </label>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle ms-1"></i>ذخیره تغییرات
+                        </button>
+                        <a asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-right ms-1"></i>بازگشت
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Role Info Sidebar -->
+    <div class="col-md-5">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-info-circle ms-2 text-info"></i>راهنمای نقش‌ها</h6>
+            </div>
+            <div class="card-body">
+                <div class="list-group list-group-flush">
+                    <div class="list-group-item">
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="badge bg-primary fs-6">فناوری</span>
+                            <div>
+                                <strong>مدیر فناوری</strong>
+                                <small class="d-block text-muted">دسترسی کامل به تمام بخش‌ها</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="list-group-item">
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="badge bg-info fs-6">ارشاد</span>
+                            <div>
+                                <strong>مدیر ارشاد</strong>
+                                <small class="d-block text-muted">ثبت ارجاع و مشاهده گزارش‌ها</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="list-group-item">
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="badge bg-warning text-dark fs-6">دفتر</span>
+                            <div>
+                                <strong>مدیر دفتر شعبه</strong>
+                                <small class="d-block text-muted">مدیریت ورود/خروج مراجعه‌کنندگان</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="list-group-item">
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="badge bg-success fs-6">شعبه</span>
+                            <div>
+                                <strong>کاربر شعبه</strong>
+                                <small class="d-block text-muted">مشاهده ارجاعات شعبه خود</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="list-group-item">
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="badge bg-danger fs-6">ورودی</span>
+                            <div>
+                                <strong>کنترل کننده ورودی</strong>
+                                <small class="d-block text-muted">مشاهده تمام ارجاعات و تأیید ورود مراجعه‌کنندگان</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.getElementById('Role').addEventListener('change', function () {
+            var branchCol = document.getElementById('BranchId').closest('.col-md-6');
+            if (this.value === 'BranchUser' || this.value === 'OfficeManager') {
+                branchCol.style.display = '';
+            } else {
+                branchCol.style.display = 'none';
+                document.getElementById('BranchId').value = '';
+            }
+        });
+        document.getElementById('Role').dispatchEvent(new Event('change'));
+    </script>
+}

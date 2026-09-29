@@ -1,0 +1,343 @@
+@model OfficeManagerDashboardViewModel
+@{
+    ViewData["Title"] = "مدیریت مراجعه‌کنندگان و ارجاعات";
+}
+
+<!-- Welcome Banner -->
+<div class="office-welcome animate-fade-in">
+    <div class="welcome-icon">
+        <i class="bi bi-building"></i>
+    </div>
+    <h3>مدیریت حضور و خروج</h3>
+    <div class="branch-name">
+        <i class="bi bi-door-open ms-1"></i>@Model.BranchName
+    </div>
+    <div class="welcome-date">
+        <i class="bi bi-calendar3 ms-1"></i>@DateTime.Now.ToPersianDate()
+    </div>
+</div>
+
+<!-- Stats Summary -->
+<div class="row g-3 mb-4 animate-fade-in" style="max-width:900px;margin-left:auto;margin-right:auto;">
+    <!-- Visitor Stats -->
+    <div class="col-3">
+        <div class="stat-card" style="padding:1rem;border-radius:12px;background:linear-gradient(135deg,#e65100,#ff9800);color:white;">
+            <div class="stat-number" style="font-size:1.8rem;">@Model.WaitingVisitorsCount</div>
+            <div class="stat-label" style="font-size:0.78rem;">مراجعه‌کننده در انتظار</div>
+        </div>
+    </div>
+    <div class="col-3">
+        <div class="stat-card" style="padding:1rem;border-radius:12px;background:linear-gradient(135deg,#1b5e20,#43a047);color:white;">
+            <div class="stat-number" style="font-size:1.8rem;">@Model.ArrivedVisitorsCount</div>
+            <div class="stat-label" style="font-size:0.78rem;">مراجعه‌کننده حاضر</div>
+        </div>
+    </div>
+    <!-- Referral Stats -->
+    <div class="col-3">
+        <div class="stat-card" style="padding:1rem;border-radius:12px;background:linear-gradient(135deg,#1565c0,#42a5f5);color:white;">
+            <div class="stat-number" style="font-size:1.8rem;">@Model.WaitingReferralsCount</div>
+            <div class="stat-label" style="font-size:0.78rem;">ارجاع در انتظار</div>
+        </div>
+    </div>
+    <div class="col-3">
+        <div class="stat-card" style="padding:1rem;border-radius:12px;background:linear-gradient(135deg,#6a1b9a,#ab47bc);color:white;">
+            <div class="stat-number" style="font-size:1.8rem;">@Model.ActiveReferralsCount</div>
+            <div class="stat-label" style="font-size:0.78rem;">ارجاع فعال</div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== ثبت حضور — مراجعه‌کنندگان ==================== -->
+@if (Model.WaitingVisitors.Any())
+{
+    <div class="office-visitor-list animate-fade-in mb-4">
+        <div class="card" style="border:2px solid #e65100;">
+            <div class="card-header" style="background:linear-gradient(to left,#fff3e0,#fff8e1);border-bottom:2px solid rgba(230,81,0,0.2);">
+                <h6 class="mb-0" style="color:#e65100;">
+                    <i class="bi bi-person-check ms-2"></i>
+                    ثبت حضور — مراجعه‌کنندگان
+                    <span class="badge bg-warning ms-2" style="font-size:0.75rem;color:#000;">@Model.WaitingVisitorsCount نفر</span>
+                </h6>
+            </div>
+            <div class="card-body p-0">
+                @foreach (var item in Model.WaitingVisitors)
+                {
+                    <div class="visitor-item">
+                        <div class="visitor-info">
+                            <div class="visitor-name">
+                                <i class="bi bi-person-circle ms-1" style="color:#e65100;"></i>
+                                @item.VisitorName
+                            </div>
+                            <div class="visitor-meta">
+                                <span title="@item.Subject">
+                                    <i class="bi bi-card-heading ms-1"></i>
+                                    @(item.Subject.Length > 30 ? item.Subject.Substring(0, 30) + "..." : item.Subject)
+                                </span>
+                                &nbsp;|&nbsp;
+                                <i class="bi bi-clock ms-1"></i>
+                                ثبت: @item.EntryTime.ToString("HH:mm")
+                                @if (!string.IsNullOrEmpty(item.NationalCode))
+                                {
+                                    <span>&nbsp;|&nbsp;<code style="font-size:0.78rem;">@item.NationalCode</code></span>
+                                }
+                            </div>
+                        </div>
+                        <div class="visitor-status">
+                            <form asp-controller="VisitorEntries" asp-action="RegisterArrival" asp-route-id="@item.Id" method="post">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn-arrival-visitor" title="ثبت حضور">
+                                    <i class="bi bi-check-lg ms-1"></i>
+                                    تأیید حضور
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+<!-- ==================== ثبت حضور — ارجاعات ==================== -->
+@if (Model.WaitingReferrals.Any())
+{
+    <div class="office-visitor-list animate-fade-in mb-4">
+        <div class="card" style="border:2px solid #1565c0;">
+            <div class="card-header" style="background:linear-gradient(to left,#e3f2fd,#e8eaf6);border-bottom:2px solid rgba(21,101,192,0.2);">
+                <h6 class="mb-0" style="color:#1565c0;">
+                    <i class="bi bi-folder2-open ms-2"></i>
+                    ثبت حضور — ارجاعات
+                    <span class="badge bg-primary ms-2" style="font-size:0.75rem;">@Model.WaitingReferralsCount پرونده</span>
+                </h6>
+            </div>
+            <div class="card-body p-0">
+                @foreach (var item in Model.WaitingReferrals)
+                {
+                    <div class="visitor-item">
+                        <div class="visitor-info">
+                            <div class="visitor-name">
+                                <i class="bi bi-folder-fill ms-1" style="color:#1565c0;"></i>
+                                @item.Person?.FullName
+                                <span class="badge bg-secondary ms-2" style="font-size:0.7rem;">@item.ReferralNumber</span>
+                            </div>
+                            <div class="visitor-meta">
+                                <span title="@item.Subject">
+                                    <i class="bi bi-card-heading ms-1"></i>
+                                    @(item.Subject.Length > 35 ? item.Subject.Substring(0, 35) + "..." : item.Subject)
+                                </span>
+                                &nbsp;|&nbsp;
+                                <i class="bi bi-calendar3 ms-1"></i>
+                                @item.ReferralDate.ToPersianDate()
+                                @if (!string.IsNullOrEmpty(item.Person?.NationalCode))
+                                {
+                                    <span>&nbsp;|&nbsp;<code style="font-size:0.78rem;">@item.Person.NationalCode</code></span>
+                                }
+                            </div>
+                        </div>
+                        <div class="visitor-status">
+                            <form asp-controller="VisitorEntries" asp-action="RegisterReferralArrival" asp-route-id="@item.Id" method="post">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn-arrival-visitor" style="background:linear-gradient(135deg,#1565c0,#1976d2);box-shadow:0 3px 10px rgba(21,101,192,0.3);" title="تأیید دریافت">
+                                    <i class="bi bi-check-lg ms-1"></i>
+                                    تأیید دریافت
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+<!-- ==================== ثبت خروج — مراجعه‌کنندگان ==================== -->
+@if (Model.ArrivedVisitors.Any())
+{
+    <div class="office-visitor-list animate-fade-in mb-4">
+        <div class="card" style="border:2px solid #1b5e20;">
+            <div class="card-header" style="background:linear-gradient(to left,#e8f5e9,#f1f8e9);border-bottom:2px solid rgba(27,94,32,0.2);">
+                <h6 class="mb-0" style="color:#1b5e20;">
+                    <i class="bi bi-person-dash ms-2"></i>
+                    ثبت خروج — مراجعه‌کنندگان
+                    @if (Model.ArrivedVisitors.Any())
+                    {
+                        <span class="badge bg-success ms-2" style="font-size:0.75rem;">@Model.ArrivedVisitorsCount نفر در شعبه</span>
+                    }
+                </h6>
+            </div>
+            <div class="card-body p-0">
+                @foreach (var item in Model.ArrivedVisitors)
+                {
+                    <div class="visitor-item">
+                        <div class="visitor-info">
+                            <div class="visitor-name">
+                                <i class="bi bi-person-circle ms-1" style="color:#43a047;"></i>
+                                @item.VisitorName
+                            </div>
+                            <div class="visitor-meta">
+                                <span title="@item.Subject">
+                                    <i class="bi bi-card-heading ms-1"></i>
+                                    @(item.Subject.Length > 30 ? item.Subject.Substring(0, 30) + "..." : item.Subject)
+                                </span>
+                                &nbsp;|&nbsp;
+                                <i class="bi bi-clock ms-1"></i>
+                                حضور: @item.ArrivalTime?.ToString("HH:mm")
+                                @if (!string.IsNullOrEmpty(item.NationalCode))
+                                {
+                                    <span>&nbsp;|&nbsp;<code style="font-size:0.78rem;">@item.NationalCode</code></span>
+                                }
+                            </div>
+                        </div>
+                        <div class="visitor-status">
+                            <form asp-controller="VisitorEntries" asp-action="RegisterExit" asp-route-id="@item.Id" method="post">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn-exit-visitor" title="ثبت خروج">
+                                    <i class="bi bi-box-arrow-left ms-1"></i>
+                                    ثبت خروج
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+<!-- ==================== ثبت خروج — ارجاعات ==================== -->
+@if (Model.ActiveReferrals.Any())
+{
+    <div class="office-visitor-list animate-fade-in mb-4">
+        <div class="card" style="border:2px solid #6a1b9a;">
+            <div class="card-header" style="background:linear-gradient(to left,#f3e5f5,#ede7f6);border-bottom:2px solid rgba(106,27,154,0.2);">
+                <h6 class="mb-0" style="color:#6a1b9a;">
+                    <i class="bi bi-folder-check ms-2"></i>
+                    ثبت خروج — ارجاعات
+                    <span class="badge bg-purple ms-2" style="font-size:0.75rem;background:#6a1b9a;">@Model.ActiveReferralsCount پرونده فعال</span>
+                </h6>
+            </div>
+            <div class="card-body p-0">
+                @foreach (var item in Model.ActiveReferrals)
+                {
+                    <div class="visitor-item">
+                        <div class="visitor-info">
+                            <div class="visitor-name">
+                                <i class="bi bi-folder-fill ms-1" style="color:#6a1b9a;"></i>
+                                @item.Person?.FullName
+                                <span class="badge bg-secondary ms-2" style="font-size:0.7rem;">@item.ReferralNumber</span>
+                            </div>
+                            <div class="visitor-meta">
+                                <span title="@item.Subject">
+                                    <i class="bi bi-card-heading ms-1"></i>
+                                    @(item.Subject.Length > 35 ? item.Subject.Substring(0, 35) + "..." : item.Subject)
+                                </span>
+                                &nbsp;|&nbsp;
+                                @{
+                                    var statusBadge = item.Status switch
+                                    {
+                                        ReferralStatus.Received => "bg-info",
+                                        ReferralStatus.InProgress => "bg-warning text-dark",
+                                        _ => "bg-secondary"
+                                    };
+                                }
+                                <span class="badge @statusBadge" style="font-size:0.7rem;">@item.Status.GetDisplayName()</span>
+                            </div>
+                        </div>
+                        <div class="visitor-status">
+                            <form asp-controller="VisitorEntries" asp-action="RegisterReferralExit" asp-route-id="@item.Id" method="post">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn-exit-visitor" style="background:linear-gradient(135deg,#6a1b9a,#8e24aa);box-shadow:0 3px 10px rgba(106,27,154,0.3);" title="مختومه کردن">
+                                    <i class="bi bi-folder-check ms-1"></i>
+                                    مختومه کردن
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+<!-- ==================== خلاصه خروج ثبت شده ==================== -->
+@if (Model.ExitedVisitors.Any() || Model.ClosedReferrals.Any())
+{
+    <div class="office-visitor-list animate-fade-in mt-4">
+        <div class="card" style="opacity:0.75;">
+            <div class="card-header">
+                <h6 class="mb-0" style="color:#6c757d;">
+                    <i class="bi bi-check-circle ms-2"></i>
+                    خروج ثبت شده (@(Model.ExitedVisitorsCount + Model.ClosedReferralsCount) مورد)
+                </h6>
+            </div>
+            <div class="card-body p-0">
+                @foreach (var item in Model.ExitedVisitors)
+                {
+                    <div class="visitor-item opacity-75">
+                        <div class="visitor-info">
+                            <div class="visitor-name" style="color:#6c757d;">
+                                <i class="bi bi-person-circle ms-1" style="color:#adb5bd;"></i>
+                                @item.VisitorName
+                                <span class="badge bg-light text-dark ms-1" style="font-size:0.65rem;">مراجعه‌کننده</span>
+                            </div>
+                            <div class="visitor-meta">
+                                <i class="bi bi-clock ms-1"></i>
+                                خروج: @item.ExitTime?.ToString("HH:mm")
+                            </div>
+                        </div>
+                    </div>
+                }
+                @foreach (var item in Model.ClosedReferrals)
+                {
+                    <div class="visitor-item opacity-75">
+                        <div class="visitor-info">
+                            <div class="visitor-name" style="color:#6c757d;">
+                                <i class="bi bi-folder ms-1" style="color:#adb5bd;"></i>
+                                @item.Person?.FullName
+                                <span class="badge bg-light text-dark ms-1" style="font-size:0.65rem;">@item.ReferralNumber</span>
+                            </div>
+                            <div class="visitor-meta">
+                                <span class="badge bg-success" style="font-size:0.7rem;">@item.Status.GetDisplayName()</span>
+                                &nbsp;|&nbsp;
+                                <i class="bi bi-calendar3 ms-1"></i>
+                                @item.ReferralDate.ToPersianDate()
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Empty State -->
+@if (!Model.WaitingVisitors.Any() && !Model.ArrivedVisitors.Any() && !Model.WaitingReferrals.Any() && !Model.ActiveReferrals.Any())
+{
+    <div class="office-empty-state animate-fade-in" style="padding:3rem 1rem;text-align:center;">
+        <div class="empty-icon" style="font-size:3rem;color:#43a047;">
+            <i class="bi bi-check-circle"></i>
+        </div>
+        <h5 style="color:#43a047;margin-top:1rem;">همه چیز مرتب است!</h5>
+        <p style="color:#6c757d;">هیچ مراجعه‌کننده یا ارجاعی در انتظار ثبت نیست.</p>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        document.querySelectorAll('form').forEach(function(form) {
+            form.addEventListener('submit', function(e) {
+                var btn = form.querySelector('button[type="submit"]');
+                var name = form.closest('.visitor-item')?.querySelector('.visitor-name')?.textContent?.trim() || '';
+                var action = '';
+                if (btn.classList.contains('btn-arrival-visitor')) {
+                    action = 'حضور';
+                } else if (btn.classList.contains('btn-exit-visitor')) {
+                    action = 'خروج';
+                }
+                if (action && !confirm('آیا از ثبت ' + action + ' «' + name + '» اطمینان دارید؟')) {
+                    e.preventDefault();
+                }
+            });
+        });
+    </script>
+}

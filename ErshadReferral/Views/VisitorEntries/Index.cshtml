@@ -1,0 +1,218 @@
+@model IEnumerable<VisitorEntry>
+@{
+    ViewData["Title"] = "ورود و خروج مراجعه‌کنندگان";
+    var filter = ViewBag.Filter as VisitorFilterViewModel ?? new VisitorFilterViewModel();
+}
+
+<div class="page-header animate-fade-in">
+    <div class="d-flex justify-content-between align-items-center">
+        <h4><i class="bi bi-door-open ms-2"></i>ورود و خروج مراجعه‌کنندگان</h4>
+        @if (User.IsInRole(AppRoles.IT) || User.IsInRole(AppRoles.ErshadManager))
+        {
+            <a asp-action="Create" class="btn btn-success">
+                <i class="bi bi-person-plus ms-1"></i>ثبت ورود جدید
+            </a>
+        }
+    </div>
+</div>
+
+<!-- Stats -->
+<div class="row g-3 mb-4 animate-fade-in">
+    <div class="col-md-3 col-sm-6">
+        <div class="stat-card bg-gradient-info">
+            <i class="bi bi-people stat-icon"></i>
+            <div class="stat-number">@ViewBag.TodayCount</div>
+            <div class="stat-label">مراجعه‌کنندگان امروز</div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="stat-card bg-gradient-warning">
+            <i class="bi bi-person-check stat-icon"></i>
+            <div class="stat-number">@ViewBag.CurrentlyInside</div>
+            <div class="stat-label">در حال مراجعه</div>
+        </div>
+    </div>
+</div>
+
+<!-- Filter -->
+<div class="card mb-4 animate-fade-in">
+    <div class="card-header">
+        <h6 class="mb-0"><i class="bi bi-funnel ms-2"></i>فیلتر جستجو</h6>
+    </div>
+    <div class="card-body">
+        <form asp-action="Index" method="get" class="row g-3">
+            <div class="col-md-2">
+                <label class="form-label">نام مراجعه‌کننده</label>
+                <input type="text" name="VisitorName" value="@filter.VisitorName" class="form-control" placeholder="نام..." />
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">کد ملی</label>
+                <input type="text" name="NationalCode" value="@filter.NationalCode" class="form-control" placeholder="کد ملی..." />
+            </div>
+            @if (!User.IsInRole(AppRoles.OfficeManager) && !User.IsInRole(AppRoles.BranchUser))
+            {
+                <div class="col-md-2">
+                    <label class="form-label">شعبه</label>
+                    <select name="BranchId" class="form-select">
+                        <option value="">همه شعب</option>
+                        @if (ViewBag.Branches is SelectList branches)
+                        {
+                            @foreach (var item in branches)
+                            {
+                                <option value="@item.Value" selected="@(item.Selected)">@item.Text</option>
+                            }
+                        }
+                    </select>
+                </div>
+            }
+            <div class="col-md-2">
+                <label class="form-label">از تاریخ</label>
+                <input type="text" name="FromDate" value="@filter.FromDate" class="form-control" placeholder="1403/01/01" dir="ltr" />
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">تا تاریخ</label>
+                <input type="text" name="ToDate" value="@filter.ToDate" class="form-control" placeholder="1403/12/29" dir="ltr" />
+            </div>
+            <div class="col-md-2">
+                <div class="form-check mt-4">
+                    <input type="checkbox" name="OnlyActive" value="true" class="form-check-input" @(filter.OnlyActive == true ? "checked" : "") />
+                    <label class="form-check-label">فقط در حال مراجعه</label>
+                </div>
+            </div>
+            <div class="col-12">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-search ms-1"></i>جستجو
+                </button>
+                <a asp-action="Index" class="btn btn-outline-secondary">
+                    <i class="bi bi-x-circle ms-1"></i>پاک کردن فیلتر
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Results -->
+<div class="card animate-fade-in">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <p class="text-muted mb-0">
+                <i class="bi bi-info-circle ms-1"></i>
+                تعداد نتایج: <strong>@Model.Count()</strong>
+            </p>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>نام مراجعه‌کننده</th>
+                        <th>کد ملی</th>
+                        <th>شعبه</th>
+                        <th>موضوع</th>
+                        <th>زمان ثبت</th>
+                        <th>زمان حضور</th>
+                        <th>زمان خروج</th>
+                        <th>وضعیت</th>
+                        <th>عملیات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr class="@(item.HasExited ? "" : "table-success")">
+                            <td><strong>@item.VisitorName</strong></td>
+                            <td><code>@(item.NationalCode ?? "—")</code></td>
+                            <td>@(item.Branch?.Court?.Name + " - " + item.Branch?.Name)</td>
+                            <td>
+                                <span title="@item.Subject">
+                                    @(item.Subject.Length > 30 ? item.Subject.Substring(0, 30) + "..." : item.Subject)
+                                </span>
+                            </td>
+                            <td>
+                                <small>@item.EntryTime.ToPersianDateTime()</small>
+                            </td>
+                            <td>
+                                @if (item.ArrivalTime.HasValue)
+                                {
+                                    <i class="bi bi-check-circle text-success ms-1"></i>
+                                    <small>@item.ArrivalTime.Value.ToPersianDateTime()</small>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">—</span>
+                                }
+                            </td>
+                            <td>
+                                @if (item.ExitTime.HasValue)
+                                {
+                                    <i class="bi bi-box-arrow-right text-danger ms-1"></i>
+                                    <small>@item.ExitTime.Value.ToPersianDateTime()</small>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">—</span>
+                                }
+                            </td>
+                            <td>
+                                @if (item.HasExited)
+                                {
+                                    <span class="badge bg-secondary">
+                                        <i class="bi bi-check-circle ms-1"></i>خارج شده
+                                    </span>
+                                }
+                                else if (item.HasArrived)
+                                {
+                                    <span class="badge bg-success">
+                                        <i class="bi bi-person-check ms-1"></i>در حال مراجعه
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning" style="color:#000;">
+                                        <i class="bi bi-hourglass ms-1"></i>در انتظار حضور
+                                    </span>
+                                }
+                            </td>
+                            <td>
+                                @if (!item.HasArrived && !item.HasExited)
+                                {
+                                    <form asp-action="RegisterArrival" asp-route-id="@item.Id" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-success" title="ثبت حضور">
+                                            <i class="bi bi-person-check"></i> حضور
+                                        </button>
+                                    </form>
+                                }
+                                @if (item.HasArrived && !item.HasExited)
+                                {
+                                    <form asp-action="RegisterExit" asp-route-id="@item.Id" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-warning" title="ثبت خروج">
+                                            <i class="bi bi-box-arrow-right"></i> خروج
+                                        </button>
+                                    </form>
+                                }
+                                @if (User.IsInRole(AppRoles.IT))
+                                {
+                                    <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline"
+                                          onclick="return confirm('آیا از حذف این رکورد اطمینان دارید؟')">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="حذف">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        @if (!Model.Any())
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-inbox fs-1 text-muted"></i>
+                <p class="text-muted mt-3">مراجعه‌کننده‌ای یافت نشد.</p>
+            </div>
+        }
+    </div>
+</div>

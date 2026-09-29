@@ -1,0 +1,356 @@
+@model IEnumerable<Referral>
+@{
+    ViewData["Title"] = "کنترل ورودی";
+}
+
+<style>
+    .scanner-input-wrapper {
+        position: relative;
+    }
+    .scanner-input {
+        font-size: 1.3rem;
+        padding: 1rem 1.2rem;
+        border: 3px solid #0d6efd;
+        border-radius: 12px;
+        direction: ltr;
+        text-align: center;
+        letter-spacing: 3px;
+        font-family: 'Courier New', monospace;
+        background: linear-gradient(135deg, #f8f9ff, #e8f4ff);
+        transition: all 0.3s ease;
+    }
+    .scanner-input:focus {
+        border-color: #0a58ca;
+        box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.15);
+        outline: none;
+        background: #fff;
+    }
+    .scanner-input::placeholder {
+        letter-spacing: 0;
+        font-family: inherit;
+        font-size: 1rem;
+    }
+    .scan-result {
+        min-height: 60px;
+        transition: all 0.3s ease;
+    }
+    .scan-success {
+        background: linear-gradient(135deg, #d4edda, #c3e6cb);
+        border: 2px solid #28a745;
+        border-radius: 12px;
+        padding: 1rem;
+        animation: fadeInUp 0.3s ease;
+    }
+    .scan-error {
+        background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+        border: 2px solid #dc3545;
+        border-radius: 12px;
+        padding: 1rem;
+        animation: fadeInUp 0.3s ease;
+    }
+    .scan-loading {
+        background: linear-gradient(135deg, #fff3cd, #ffeeba);
+        border: 2px solid #ffc107;
+        border-radius: 12px;
+        padding: 1rem;
+        animation: pulse 1s ease infinite;
+    }
+    @@keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @@keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.7; }
+    }
+    .stat-badge {
+        font-size: 2rem;
+        font-weight: 700;
+        padding: 0.5rem 1.5rem;
+        border-radius: 12px;
+    }
+    .referral-row {
+        transition: all 0.3s ease;
+    }
+    .referral-row:hover {
+        background-color: #f8f9fa;
+    }
+    .referral-row.arrived {
+        opacity: 0.5;
+        text-decoration: line-through;
+    }
+</style>
+
+<div class="page-header animate-fade-in">
+    <div class="d-flex justify-content-between align-items-center">
+        <h4><i class="bi bi-shield-check ms-2"></i>کنترل ورود مراجعه‌کنندگان</h4>
+        <span class="text-muted">@DateTime.Now.ToString("yyyy/MM/dd")</span>
+    </div>
+</div>
+
+<!-- Stats -->
+<div class="row g-3 mb-4 animate-fade-in">
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center">
+                <div class="stat-badge bg-primary text-white mx-auto">@ViewBag.TotalToday</div>
+                <div class="mt-2 fw-semibold">کل ارجاعات امروز</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center">
+                <div class="stat-badge bg-warning text-dark mx-auto">@ViewBag.PendingCount</div>
+                <div class="mt-2 fw-semibold">در انتظار ورود</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center">
+                <div class="stat-badge bg-success text-white mx-auto">@ViewBag.ArrivedCount</div>
+                <div class="mt-2 fw-semibold">ورود ثبت شده</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scanner Input -->
+<div class="card mb-4 shadow-sm animate-fade-in">
+    <div class="card-header bg-primary text-white">
+        <h6 class="mb-0"><i class="bi bi-upc-scan ms-2"></i>اسکن کارت ملی یا ورود کد ملی</h6>
+    </div>
+    <div class="card-body">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <label class="form-label fw-bold mb-2">
+                    <i class="bi bi-keyboard ms-1"></i>کد ملی ۱۰ رقمی را اسکن یا تایپ کنید
+                </label>
+                <div class="scanner-input-wrapper">
+                    <input type="text" id="nationalCodeInput" class="form-control scanner-input"
+                           maxlength="10" placeholder="1234567890"
+                           autofocus autocomplete="off" />
+                </div>
+            </div>
+        </div>
+        <div class="row justify-content-center mt-3">
+            <div class="col-md-6">
+                <div id="scanResult" class="scan-result text-center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Today's Pending Referrals Table -->
+<div class="card shadow-sm animate-fade-in">
+    <div class="card-header">
+        <h6 class="mb-0">
+            <i class="bi bi-list-check ms-2 text-warning"></i>
+            ارجاعات منتظر ورود (@ViewBag.PendingCount نفر)
+        </h6>
+    </div>
+    <div class="card-body p-0">
+        @if (Model.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>کد ملی</th>
+                            <th>نام و نام خانوادگی</th>
+                            <th>شعبه مقصد</th>
+                            <th>موضوع</th>
+                            <th>شماره ارجاع</th>
+                            <th class="text-center">عملیات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="referralsTable">
+                        @{
+                            var index = 1;
+                        }
+                        @foreach (var item in Model)
+                        {
+                            <tr class="referral-row" data-national-code="@item.Person?.NationalCode" data-referral-id="@item.Id">
+                                <td>@index</td>
+                                <td><code class="fs-6" dir="ltr">@item.Person?.NationalCode</code></td>
+                                <td><strong>@item.Person?.FullName</strong></td>
+                                <td>
+                                    <span class="badge bg-info">@item.Branch?.Court?.Name</span>
+                                    <br /><small>@item.Branch?.Name</small>
+                                </td>
+                                <td>
+                                    <span title="@item.Subject">
+                                        @(item.Subject.Length > 35 ? item.Subject.Substring(0, 35) + "..." : item.Subject)
+                                    </span>
+                                </td>
+                                <td><span class="badge bg-secondary">@item.ReferralNumber</span></td>
+                                <td class="text-center">
+                                    <button class="btn btn-sm btn-success confirm-entry-btn"
+                                            data-id="@item.Id" title="تأیید ورود">
+                                        <i class="bi bi-check-circle ms-1"></i>ورود
+                                    </button>
+                                </td>
+                            </tr>
+                            index++;
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-check-circle text-success" style="font-size:3rem;"></i>
+                <h5 class="mt-3 text-muted">هیچ ارجاع منتظر ورودی وجود ندارد</h5>
+                <p class="text-muted">همه ارجاعات امروز ورودشان ثبت شده است</p>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var input = document.getElementById('nationalCodeInput');
+            var resultDiv = document.getElementById('scanResult');
+
+            // Auto-focus the input
+            input.focus();
+
+            // Handle Enter key (barcode scanner sends Enter after scanning)
+            input.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    var code = input.value.trim();
+                    if (code.length === 10 && /^\d{10}$/.test(code)) {
+                        processNationalCode(code);
+                    } else if (code.length > 0) {
+                        showResult('error', 'کد ملی باید ۱۰ رقم باشد');
+                    }
+                }
+            });
+
+            // Also handle input event for auto-submit when 10 digits are entered
+            input.addEventListener('input', function () {
+                var code = input.value.trim();
+                if (code.length === 10 && /^\d{10}$/.test(code)) {
+                    processNationalCode(code);
+                }
+            });
+
+            function isValidNationalCode(code) {
+                if (!code || code.length !== 10) return false;
+                if (!/^\d{10}$/.test(code)) return false;
+                if (code.split('').every(function(c){ return c === code[0]; })) return false;
+                var sum = 0;
+                for (var i = 0; i < 9; i++) sum += parseInt(code[i]) * (10 - i);
+                var remainder = sum % 11;
+                var control = parseInt(code[9]);
+                if (remainder < 2) return control === remainder;
+                return control === (11 - remainder);
+            }
+
+            // Confirm entry button click
+            document.querySelectorAll('.confirm-entry-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var referralId = this.getAttribute('data-id');
+                    confirmEntry(referralId);
+                });
+            });
+
+            function processNationalCode(code) {
+                if (!code || code.length !== 10 || !/^\d{10}$/.test(code)) {
+                    showResult('error', 'کد ملی باید ۱۰ رقم باشد');
+                    return;
+                }
+
+                if (!isValidNationalCode(code)) {
+                    showResult('error', 'فرمت کد ملی نامعتبر است');
+                    return;
+                }
+
+                showResult('loading', '<i class="bi bi-hourglass-split ms-1"></i>در حال جستجو...');
+                input.disabled = true;
+
+                var token = document.querySelector('input[name="__RequestVerificationToken"]');
+                var formData = new FormData();
+                formData.append('nationalCode', code);
+                if (token) formData.append('__RequestVerificationToken', token.value);
+
+                fetch('@Url.Action("LookupByNationalCode", "VisitorEntries")', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(function(response) { return response.json(); })
+                .then(function(data) {
+                    if (data.success) {
+                        showResult('success', '<i class="bi bi-check-circle-fill ms-1"></i>' + data.message + '<br><small>' + data.branches + '</small>');
+                        // Remove the row from table
+                        var row = document.querySelector('tr[data-national-code="' + code + '"]');
+                        if (row) {
+                            row.style.transition = 'all 0.5s ease';
+                            row.style.opacity = '0';
+                            row.style.backgroundColor = '#d4edda';
+                            setTimeout(function() { row.remove(); updateCounts(); }, 500);
+                        }
+                    } else {
+                        showResult('error', '<i class="bi bi-exclamation-triangle-fill ms-1"></i>' + data.message);
+                    }
+                })
+                .catch(function() {
+                    showResult('error', '<i class="bi bi-exclamation-triangle-fill ms-1"></i>خطا در برقراری ارتباط با سرور');
+                })
+                .finally(function() {
+                    input.value = '';
+                    input.disabled = false;
+                    input.focus();
+                });
+            }
+
+            function confirmEntry(referralId) {
+                var token = document.querySelector('input[name="__RequestVerificationToken"]');
+                var formData = new FormData();
+                formData.append('id', referralId);
+                if (token) formData.append('__RequestVerificationToken', token.value);
+
+                fetch('@Url.Action("RegisterReferralArrival", "VisitorEntries")', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(function(response) {
+                    if (response.redirected) {
+                        window.location.reload();
+                    } else {
+                        window.location.reload();
+                    }
+                });
+            }
+
+            function showResult(type, message) {
+                resultDiv.className = 'scan-result';
+                if (type === 'loading') {
+                    resultDiv.className += ' scan-loading';
+                } else if (type === 'success') {
+                    resultDiv.className += ' scan-success';
+                } else {
+                    resultDiv.className += ' scan-error';
+                }
+                resultDiv.innerHTML = message;
+            }
+
+            function updateCounts() {
+                var pendingRows = document.querySelectorAll('#referralsTable tr').length;
+                var statBadges = document.querySelectorAll('.stat-badge');
+                if (statBadges.length >= 2) {
+                    statBadges[1].textContent = pendingRows;
+                }
+                if (statBadges.length >= 3) {
+                    var currentArrived = parseInt(statBadges[2].textContent) || 0;
+                    statBadges[2].textContent = currentArrived + 1;
+                }
+            }
+        });
+    </script>
+}

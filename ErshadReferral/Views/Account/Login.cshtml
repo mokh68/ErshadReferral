@@ -1,0 +1,58 @@
+@model LoginViewModel
+@{
+    ViewData["Title"] = "ورود به سامانه";
+    Layout = "_Layout";
+}
+
+<div class="row justify-content-center mt-5 animate-fade-in">
+    <div class="col-md-4">
+        <div class="login-card">
+            <div class="login-header">
+                <i class="bi bi-building fs-1 mb-3 d-block"></i>
+                <h5>ورود به سامانه ارجاعات ارشاد</h5>
+                <p class="mb-0 mt-2 opacity-75" style="font-size: 0.9rem;">سامانه مدیریت ارجاعات واحد ارشاد</p>
+            </div>
+            <div class="login-body">
+                <form asp-action="Login" asp-route-returnUrl="@ViewData["ReturnUrl"]" method="post">
+                    <div asp-validation-summary="All" class="text-danger mb-3"></div>
+                    
+                    <div class="mb-3">
+                        <label asp-for="UserName" class="form-label">
+                            <i class="bi bi-person ms-1"></i>نام کاربری
+                        </label>
+                        <input asp-for="UserName" class="form-control" autofocus placeholder="نام کاربری خود را وارد کنید" />
+                        <span asp-validation-for="UserName" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label asp-for="Password" class="form-label">
+                            <i class="bi bi-lock ms-1"></i>رمز عبور
+                        </label>
+                        <input asp-for="Password" class="form-control" placeholder="رمز عبور خود را وارد کنید" />
+                        <span asp-validation-for="Password" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="form-check mb-4">
+                        <input asp-for="RememberMe" class="form-check-input" />
+                        <label asp-for="RememberMe" class="form-check-label">مرا به خاطر بسپار</label>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100 py-2">
+                        <i class="bi bi-box-arrow-in-left ms-2"></i>ورود به سامانه
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <div class="text-center mt-3">
+            <small class="text-muted">
+                <i class="bi bi-shield-check ms-1"></i>
+                سامانه ارجاعات واحد ارشاد - نسخه ۱.۰
+            </small>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

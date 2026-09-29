@@ -1,0 +1,160 @@
+@model IEnumerable<Referral>
+@{
+    ViewData["Title"] = "ارجاعات";
+    var filter = ViewBag.Filter as ReferralFilterViewModel ?? new ReferralFilterViewModel();
+}
+
+<div class="page-header animate-fade-in">
+    <div class="d-flex justify-content-between align-items-center">
+        <h4><i class="bi bi-folder2-open ms-2"></i>لیست ارجاعات</h4>
+        @if (User.IsInRole(AppRoles.IT) || User.IsInRole(AppRoles.ErshadManager) || User.IsInRole(AppRoles.OfficeManager))
+        {
+            <a asp-action="Create" class="btn btn-success">
+                <i class="bi bi-plus-circle ms-1"></i>ثبت ارجاع جدید
+            </a>
+        }
+    </div>
+</div>
+
+<!-- Filter -->
+<div class="card mb-4 animate-fade-in">
+    <div class="card-header">
+        <h6 class="mb-0"><i class="bi bi-funnel ms-2"></i>فیلتر جستجو</h6>
+    </div>
+    <div class="card-body">
+        <form asp-action="Index" method="get" class="row g-3">
+            <div class="col-md-2">
+                <label class="form-label">کد ملی</label>
+                <input type="text" name="NationalCode" value="@filter.NationalCode" class="form-control" placeholder="کد ملی..." />
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">شماره ارجاع</label>
+                <input type="text" name="ReferralNumber" value="@filter.ReferralNumber" class="form-control" placeholder="شماره ارجاع..." />
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">شعبه</label>
+                <select name="BranchId" class="form-select">
+                    <option value="">همه شعب</option>
+                    @if (ViewBag.Branches is SelectList branches)
+                    {
+                        @foreach (var item in branches)
+                        {
+                            <option value="@item.Value" selected="@(item.Selected)">@item.Text</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">وضعیت</label>
+                <select name="Status" class="form-select">
+                    <option value="">همه وضعیت‌ها</option>
+                    @foreach (ReferralStatus s in Enum.GetValues<ReferralStatus>())
+                    {
+                        <option value="@s" selected="@(filter.Status == s)">@s.GetDisplayName()</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">از تاریخ</label>
+                <input type="text" name="FromDate" value="@filter.FromDate" class="form-control" placeholder="1403/01/01" dir="ltr" />
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">تا تاریخ</label>
+                <input type="text" name="ToDate" value="@filter.ToDate" class="form-control" placeholder="1403/12/29" dir="ltr" />
+            </div>
+            <div class="col-12">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-search ms-1"></i>جستجو
+                </button>
+                <a asp-action="Index" class="btn btn-outline-secondary">
+                    <i class="bi bi-x-circle ms-1"></i>پاک کردن فیلتر
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Results -->
+<div class="card animate-fade-in">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <p class="text-muted mb-0">
+                <i class="bi bi-info-circle ms-1"></i>
+                تعداد نتایج: <strong>@Model.Count()</strong>
+            </p>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>شماره ارجاع</th>
+                        <th>مراجع</th>
+                        <th>کد ملی</th>
+                        <th>شعبه مقصد</th>
+                        <th>موضوع</th>
+                        <th>تاریخ ارجاع</th>
+                        <th>وضعیت</th>
+                        <th>عملیات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td><strong class="text-primary">@item.ReferralNumber</strong></td>
+                            <td>@item.Person?.FullName</td>
+                            <td><code>@item.Person?.NationalCode</code></td>
+                            <td>@(item.Branch?.Court?.Name + " - " + item.Branch?.Name)</td>
+                            <td>
+                                <span title="@item.Subject">
+                                    @(item.Subject?.Length > 40 ? item.Subject.Substring(0, 40) + "..." : item.Subject)
+                                </span>
+                            </td>
+                            <td>
+                                <span class="text-muted">
+                                    <i class="bi bi-calendar3 ms-1"></i>
+                                    @item.ReferralDate.ToPersianDate()
+                                </span>
+                            </td>
+                            <td>
+                                @{
+                                    var badgeClass = item.Status switch
+                                    {
+                                        ReferralStatus.Referred => "bg-primary",
+                                        ReferralStatus.Received => "bg-info",
+                                        ReferralStatus.InProgress => "bg-warning text-dark",
+                                        ReferralStatus.Closed => "bg-success",
+                                        ReferralStatus.ReturnedToErshad => "bg-secondary",
+                                        ReferralStatus.Cancelled => "bg-danger",
+                                        _ => "bg-secondary"
+                                    };
+                                }
+                                <span class="badge @badgeClass">@item.Status.GetDisplayName()</span>
+                            </td>
+                            <td>
+                                <div class="d-flex gap-1">
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a asp-action="Receipt" asp-route-id="@item.Id" class="btn btn-sm btn-success" target="_blank" title="چاپ قبض">
+                                        <i class="bi bi-receipt"></i>
+                                    </a>
+                                    <a asp-action="Print" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary" target="_blank" title="چاپ برگه">
+                                        <i class="bi bi-printer"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        @if (!Model.Any())
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-inbox fs-1 text-muted"></i>
+                <p class="text-muted mt-3">ارجاعی یافت نشد.</p>
+            </div>
+        }
+    </div>
+</div>

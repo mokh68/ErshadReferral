@@ -1,0 +1,120 @@
+@model VisitorEntryCreateViewModel
+@{
+    ViewData["Title"] = "ثبت ورود مراجعه‌کننده";
+}
+
+<div class="page-header animate-fade-in">
+    <div class="d-flex justify-content-between align-items-center">
+        <h4><i class="bi bi-person-plus ms-2"></i>ثبت ورود مراجعه‌کننده</h4>
+        <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-right ms-1"></i>بازگشت
+        </a>
+    </div>
+</div>
+
+<div class="row justify-content-center animate-fade-in">
+    <div class="col-md-7 col-lg-6">
+        <div class="card touch-form form-card">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-door-open ms-2"></i>اطلاعات مراجعه‌کننده</h6>
+            </div>
+            <div class="card-body">
+                <form asp-action="Create" method="post">
+                    <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+                    <!-- Visitor Name - Full width, big -->
+                    <div class="mb-4">
+                        <label asp-for="VisitorName" class="form-label">
+                            <i class="bi bi-person"></i>نام و نام خانوادگی
+                        </label>
+                        <input asp-for="VisitorName" class="form-control form-control-lg" autofocus
+                               placeholder="نام کامل مراجعه‌کننده را وارد کنید" style="font-size:1.1rem;padding:0.85rem 1rem;" />
+                        <span asp-validation-for="VisitorName" class="text-danger"></span>
+                    </div>
+
+                    <!-- National Code + Mobile -->
+                    <div class="row mb-4">
+                        <div class="col-md-6 mb-3 mb-md-0">
+                            <label asp-for="NationalCode" class="form-label">
+                                <i class="bi bi-hash"></i>کد ملی
+                            </label>
+                            <input asp-for="NationalCode" class="form-control form-control-lg" maxlength="10"
+                                   placeholder="کد ملی ۱۰ رقمی" dir="ltr" style="font-size:1.1rem;padding:0.85rem 1rem;" />
+                            <span asp-validation-for="NationalCode" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Mobile" class="form-label">
+                                <i class="bi bi-phone"></i>شماره موبایل
+                            </label>
+                            <input asp-for="Mobile" class="form-control form-control-lg" placeholder="شماره موبایل" dir="ltr"
+                                   style="font-size:1.1rem;padding:0.85rem 1rem;" />
+                            <span asp-validation-for="Mobile" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <!-- Branch -->
+                    <div class="mb-4">
+                        <label asp-for="BranchId" class="form-label">
+                            <i class="bi bi-door-open"></i>شعبه
+                        </label>
+                        <select asp-for="BranchId" asp-items="ViewBag.Branches" class="form-select form-select-lg"
+                                style="font-size:1.05rem;padding:0.85rem 1rem;">
+                            <option value="">-- انتخاب شعبه --</option>
+                        </select>
+                        <span asp-validation-for="BranchId" class="text-danger"></span>
+                    </div>
+
+                    <!-- Subject - Full width -->
+                    <div class="mb-4">
+                        <label asp-for="Subject" class="form-label">
+                            <i class="bi bi-card-heading"></i>موضوع مراجعه
+                        </label>
+                        <select asp-for="Subject" class="form-select form-select-lg"
+                                style="font-size:1.05rem;padding:0.85rem 1rem;">
+                            <option value="">-- انتخاب موضوع --</option>
+                            @foreach (var subject in ErshadReferral.Models.ReferralSubjects.Subjects)
+                            {
+                                <option value="@subject">@subject</option>
+                            }
+                        </select>
+                        <span asp-validation-for="Subject" class="text-danger"></span>
+                    </div>
+
+                    <!-- Notes -->
+                    <div class="mb-4">
+                        <label asp-for="Notes" class="form-label">
+                            <i class="bi bi-text-paragraph"></i>توضیحات (اختیاری)
+                        </label>
+                        <textarea asp-for="Notes" class="form-control" rows="3" maxlength="500"
+                                  placeholder="توضیحات تکمیلی..."></textarea>
+                        <span asp-validation-for="Notes" class="text-danger"></span>
+                    </div>
+
+                    <!-- Time Display -->
+                    <div class="time-display mb-4">
+                        <div class="time-value">@DateTime.Now.ToString("HH:mm")</div>
+                        <div class="time-label">
+                            <i class="bi bi-clock ms-1"></i>زمان ورود به صورت خودکار ثبت می‌شود
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="btn btn-success submit-btn">
+                        <i class="bi bi-check-circle ms-2"></i>ثبت ورود مراجعه‌کننده
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Auto-focus the name field and set current time display
+        document.addEventListener('DOMContentLoaded', function() {
+            var nameInput = document.querySelector('input[name="VisitorName"]');
+            if (nameInput) nameInput.focus();
+        });
+    </script>
+}

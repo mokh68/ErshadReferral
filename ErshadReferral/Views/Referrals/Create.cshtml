@@ -1,0 +1,259 @@
+@model ReferralCreateViewModel
+@{
+    ViewData["Title"] = "ثبت ارجاع جدید";
+}
+
+<style>
+    .scanner-input-wrapper {
+        position: relative;
+    }
+    .scanner-input {
+        font-size: 1.3rem;
+        padding: 1rem 1.2rem;
+        border: 3px solid #0d6efd;
+        border-radius: 12px;
+        direction: ltr;
+        text-align: center;
+        letter-spacing: 3px;
+        font-family: 'Courier New', monospace;
+        background: linear-gradient(135deg, #f8f9ff, #e8f4ff);
+        transition: all 0.3s ease;
+    }
+    .scanner-input:focus {
+        border-color: #0a58ca;
+        box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.15);
+        outline: none;
+        background: #fff;
+    }
+    .scanner-input::placeholder {
+        letter-spacing: 0;
+        font-family: inherit;
+        font-size: 1rem;
+    }
+    .scan-result {
+        min-height: 60px;
+        transition: all 0.3s ease;
+    }
+</style>
+
+<div class="page-header animate-fade-in">
+    <h4><i class="bi bi-plus-circle ms-2"></i>ثبت ارجاع جدید</h4>
+</div>
+
+<div class="row justify-content-center animate-fade-in">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-person-plus ms-2 text-success"></i>اطلاعات مراجع</h6>
+            </div>
+            <div class="card-body">
+                <form asp-action="Create" method="post">
+                    <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+                    <div class="row mb-12">
+                        <div class="col-md-12">
+                            <label asp-for="NationalCode" class="form-label">
+                                <i class="bi bi-hash ms-1"></i>کد ملی
+                            </label>
+                            <div class="scanner-input-wrapper">
+                                <input asp-for="NationalCode" id="nationalCodeInput" class="form-control scanner-input" placeholder="کد ملی ۱۰ رقمی" maxlength="10" />
+                            </div>
+                            <div id="scanResult" class="scan-result text-center small text-muted mt-1"></div>
+                            <span asp-validation-for="NationalCode" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="FirstName" class="form-label">
+                                <i class="bi bi-person ms-1"></i>نام
+                            </label>
+                            <input asp-for="FirstName" class="form-control" />
+                            <span asp-validation-for="FirstName" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="LastName" class="form-label">
+                                <i class="bi bi-person ms-1"></i>نام خانوادگی
+                            </label>
+                            <input asp-for="LastName" class="form-control" />
+                            <span asp-validation-for="LastName" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="Mobile" class="form-label">
+                                <i class="bi bi-phone ms-1"></i>موبایل
+                            </label>
+                            <input asp-for="Mobile" class="form-control" placeholder="شماره موبایل" />
+                            <span asp-validation-for="Mobile" class="text-danger"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        
+                    </div>
+
+                    <hr class="my-4" />
+
+                    <h6 class="text-muted mb-3">
+                        <i class="bi bi-folder2 ms-1"></i>اطلاعات ارجاع
+                    </h6>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <label asp-for="BranchId" class="form-label">
+                                <i class="bi bi-door-open ms-1"></i>شعبه مقصد
+                            </label>
+                            <select id="BranchId" asp-for="BranchId" asp-items="ViewBag.Branches" class="form-select" disabled tabindex="2">
+                                <option value="">-- انتخاب شعبه --</option>
+                            </select>
+                            <span asp-validation-for="BranchId" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label asp-for="Subject" class="form-label">
+                            <i class="bi bi-card-heading ms-1"></i>موضوع
+                        </label>
+                        <select asp-for="Subject" class="form-select">
+                            <option value="">-- انتخاب موضوع --</option>
+                            @foreach (var subject in ErshadReferral.Models.ReferralSubjects.Subjects)
+                            {
+                                <option value="@subject">@subject</option>
+                            }
+                        </select>
+                        <span asp-validation-for="Subject" class="text-danger"></span>
+                    </div>
+                    <div class="mb-4" style="display:none;">
+                        <label asp-for="Description" class="form-label">
+                            <i class="bi bi-text-paragraph ms-1"></i>شرح
+                        </label>
+                        <textarea asp-for="Description" class="form-control" rows="4" maxlength="1000" placeholder="توضیحات تکمیلی..."></textarea>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-check-circle ms-1"></i>ثبت ارجاع
+                        </button>
+                        <a asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-right ms-1"></i>بازگشت
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        (function(){
+                var nationalInput = document.getElementById('nationalCodeInput');
+            var resultDiv = document.getElementById('scanResult');
+            var branchSelect = document.getElementById('BranchId');
+
+            var firstInput = document.querySelector('[name="FirstName"]');
+            var lastInput = document.querySelector('[name="LastName"]');
+            var mobileInput = document.querySelector('[name="Mobile"]');
+
+            var touched = { first: false, last: false, mobile: false };
+
+            if (firstInput) firstInput.addEventListener('input', function(){ touched.first = true; });
+            if (lastInput) lastInput.addEventListener('input', function(){ touched.last = true; });
+            if (mobileInput) mobileInput.addEventListener('input', function(){ touched.mobile = true; });
+
+            function showResult(type, text){
+                if(!resultDiv) return;
+                resultDiv.className = 'scan-result text-center small';
+                resultDiv.textContent = text;
+                if(type === 'error') resultDiv.classList.add('text-danger');
+                else if(type === 'ok') resultDiv.classList.add('text-success');
+            }
+
+            function isValidNationalCode(code){
+                if (!code || code.length !== 10) return false;
+                if (!/^\d{10}$/.test(code)) return false;
+                if (code.split('').every(function(c){ return c === code[0]; })) return false;
+                var sum = 0;
+                for (var i = 0; i < 9; i++) sum += parseInt(code[i]) * (10 - i);
+                var remainder = sum % 11;
+                var control = parseInt(code[9]);
+                if (remainder < 2) return control === remainder;
+                return control === (11 - remainder);
+            }
+
+            function processNationalCode(code){
+                if (!code || code.length !== 10){
+                    showResult('error', 'کد ملی باید ۱۰ رقم باشد');
+                    return;
+                }
+
+                if (!isValidNationalCode(code)){
+                    showResult('error', 'فرمت کد ملی نامعتبر است');
+                    return;
+                }
+
+                var tokenEl = document.querySelector('input[name="__RequestVerificationToken"]');
+                var token = tokenEl ? tokenEl.value : '';
+
+                var formData = new FormData();
+                formData.append('nationalCode', code);
+                if(token) formData.append('__RequestVerificationToken', token);
+
+                fetch('@Url.Action("LookupPerson", "Referrals")', {
+                    method: 'POST',
+                    body: formData
+                }).then(function(res){ return res.json(); })
+                .then(function(json){
+                    if(!json || !json.success){
+                        if(json && json.notFound){
+                            showResult('neutral', '');
+                            return;
+                        }
+                        showResult('error', json && json.message ? json.message : 'خطا در دریافت اطلاعات');
+                        return;
+                    }
+
+                    showResult('ok', 'فرد یافت شد: ' + (json.firstName || '') + ' ' + (json.lastName || ''));
+
+                    // Fill fields only if user hasn't manually changed them
+                    if(firstInput && !touched.first && json.firstName) firstInput.value = json.firstName;
+                    if(lastInput && !touched.last && json.lastName) lastInput.value = json.lastName;
+                    if(mobileInput && !touched.mobile && json.mobile) mobileInput.value = json.mobile;
+
+                    // Enable branch selection and focus it
+                    if(branchSelect){
+                        branchSelect.disabled = false;
+                        try{ branchSelect.focus(); } catch(e){}
+                    }
+                }).catch(function(){
+                    showResult('error', 'خطا در ارتباط با سرور');
+                });
+            }
+
+            if(nationalInput){
+                nationalInput.tabIndex = 1;
+                nationalInput.addEventListener('keydown', function(e){
+                    if(e.key === 'Enter'){
+                        e.preventDefault();
+                        var code = nationalInput.value && nationalInput.value.trim();
+                        processNationalCode(code);
+                    }
+                });
+
+                // On blur or when length reaches 10, enable branch select for tab navigation
+                nationalInput.addEventListener('blur', function(){
+                    var code = nationalInput.value && nationalInput.value.trim();
+                    if(code && code.length === 10){
+                        if(branchSelect){ branchSelect.disabled = false; branchSelect.tabIndex = 2; }
+                    }
+                });
+
+                nationalInput.addEventListener('input', function(){
+                    var code = nationalInput.value && nationalInput.value.trim();
+                    if(code && code.length === 10){
+                        if(branchSelect){ branchSelect.disabled = false; branchSelect.tabIndex = 2; }
+                    } else {
+                        if(branchSelect){ branchSelect.disabled = true; branchSelect.tabIndex = -1; }
+                    }
+                });
+            }
+        })();
+    </script>
+}

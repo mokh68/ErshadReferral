@@ -1,0 +1,213 @@
+@model Referral
+@{
+    ViewData["Title"] = $"جزئیات ارجاع {Model.ReferralNumber}";
+}
+
+<div class="page-header animate-fade-in">
+    <div class="d-flex justify-content-between align-items-center">
+        <h4>
+            <i class="bi bi-info-circle ms-2"></i>
+            جزئیات ارجاع 
+            <span class="badge bg-primary fs-6 ms-2">@Model.ReferralNumber</span>
+        </h4>
+        <div class="d-flex gap-2">
+            <a asp-action="Receipt" asp-route-id="@Model.Id" class="btn btn-success" target="_blank">
+                <i class="bi bi-receipt ms-1"></i>چاپ قبض
+            </a>
+            <a asp-action="Print" asp-route-id="@Model.Id" class="btn btn-outline-secondary" target="_blank">
+                <i class="bi bi-printer ms-1"></i>چاپ برگه
+            </a>
+            <a asp-action="ShortPrint" asp-route-id="@Model.Id" class="btn btn-outline-primary" target="_blank">
+                <i class="bi bi-upc-scan ms-1"></i>پرینت کوتاه
+            </a>
+            <a asp-action="Index" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-right ms-1"></i>بازگشت
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 animate-fade-in">
+    <!-- Referral Info -->
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-folder2 ms-2 text-primary"></i>اطلاعات ارجاع</h6>
+            </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="p-3 rounded-3" style="background: #f8f9fa;">
+                            <small class="text-muted d-block">شماره ارجاع</small>
+                            <strong class="fs-5 text-primary">@Model.ReferralNumber</strong>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 rounded-3" style="background: #f8f9fa;">
+                            <small class="text-muted d-block">تاریخ ارجاع</small>
+                            <strong class="fs-5">
+                                <i class="bi bi-calendar3 ms-1"></i>
+                                @Model.ReferralDate.ToPersianDate()
+                            </strong>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        @{
+                            var badgeClass = Model.Status switch
+                            {
+                                ReferralStatus.Referred => "bg-primary",
+                                ReferralStatus.Received => "bg-info",
+                                ReferralStatus.InProgress => "bg-warning text-dark",
+                                ReferralStatus.Closed => "bg-success",
+                                ReferralStatus.ReturnedToErshad => "bg-secondary",
+                                ReferralStatus.Cancelled => "bg-danger",
+                                _ => "bg-secondary"
+                            };
+                        }
+                        <div class="p-3 rounded-3" style="background: #f8f9fa;">
+                            <small class="text-muted d-block">وضعیت فعلی</small>
+                            <span class="badge @badgeClass fs-6 mt-1">@Model.Status.GetDisplayName()</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <div class="p-3 rounded-3" style="background: #f8f9fa;">
+                        <small class="text-muted d-block">موضوع</small>
+                        <strong>@Model.Subject</strong>
+                    </div>
+                </div>
+                @if (!string.IsNullOrEmpty(Model.Description))
+                {
+                    <div class="mb-4">
+                        <div class="p-3 rounded-3" style="background: #f8f9fa;">
+                            <small class="text-muted d-block">شرح</small>
+                            <p class="mb-0 mt-1">@Model.Description</p>
+                        </div>
+                    </div>
+                }
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="p-3 rounded-3" style="background: #f8f9fa;">
+                            <small class="text-muted d-block">شعبه مقصد</small>
+                            <strong>@(Model.Branch?.Court?.Name + " - " + Model.Branch?.Name)</strong>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 rounded-3" style="background: #f8f9fa;">
+                            <small class="text-muted d-block">ثبت‌کننده</small>
+                            <strong>@Model.CreatedByUserName</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Person Info -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-person ms-2 text-success"></i>اطلاعات مراجع</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="p-3 rounded-3" style="background: #f8f9fa;">
+                            <small class="text-muted d-block">نام و نام خانوادگی</small>
+                            <strong>@Model.Person?.FullName</strong>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 rounded-3" style="background: #f8f9fa;">
+                            <small class="text-muted d-block">کد ملی</small>
+                            <strong><code>@Model.Person?.NationalCode</code></strong>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 rounded-3" style="background: #f8f9fa;">
+                            <small class="text-muted d-block">موبایل</small>
+                            <strong>@(Model.Person?.Mobile ?? "—")</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-md-4">
+        <!-- Change Status -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-arrow-repeat ms-2 text-warning"></i>تغییر وضعیت</h6>
+            </div>
+            <div class="card-body">
+                <form asp-action="ChangeStatus" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="ReferralId" value="@Model.Id" />
+                    <div class="mb-3">
+                        <label class="form-label">وضعیت جدید</label>
+                        <select name="NewStatus" class="form-select" required>
+                            <option value="">-- انتخاب وضعیت --</option>
+                            @foreach (ReferralStatus s in Enum.GetValues<ReferralStatus>())
+                            {
+                                if (s != Model.Status)
+                                {
+                                    <option value="@s">@s.GetDisplayName()</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">توضیح</label>
+                        <textarea name="Note" class="form-control" rows="3" maxlength="500" placeholder="توضیحات تغییر وضعیت..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-warning w-100">
+                        <i class="bi bi-check-circle ms-1"></i>ثبت تغییر وضعیت
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Status History -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-clock-history ms-2 text-info"></i>تاریخچه وضعیت</h6>
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush status-timeline">
+                    @foreach (var h in Model.StatusHistories.OrderByDescending(h => h.ChangedAt))
+                    {
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-secondary">@h.Status.GetDisplayName()</span>
+                                <small class="text-muted">
+                                    <i class="bi bi-clock ms-1"></i>
+                                    @h.ChangedAt.ToPersianDateTime()
+                                </small>
+                            </div>
+                            @if (!string.IsNullOrEmpty(h.Note))
+                            {
+                                <small class="text-muted d-block mt-2 p-2 rounded" style="background: #f8f9fa;">
+                                    @h.Note
+                                </small>
+                            }
+                            <small class="text-muted d-block mt-1">
+                                <i class="bi bi-person ms-1"></i>
+                                @h.ChangedByUserName 
+                                <span class="badge bg-light text-dark ms-1">@h.ChangedByRole</span>
+                            </small>
+                        </div>
+                    }
+                </div>
+                @if (!Model.StatusHistories.Any())
+                {
+                    <div class="text-center py-4">
+                        <i class="bi bi-clock fs-1 text-muted"></i>
+                        <p class="text-muted mt-2">تاریخچه‌ای ثبت نشده است.</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,138 @@
+@model IEnumerable<AppUser>
+@{
+    ViewData["Title"] = "مدیریت کاربران";
+    var userRoles = ViewBag.UserRoles as Dictionary<string, string> ?? new();
+}
+
+<div class="page-header animate-fade-in">
+    <div class="d-flex justify-content-between align-items-center">
+        <h4><i class="bi bi-people ms-2"></i>مدیریت کاربران سامانه</h4>
+        <a asp-action="Create" class="btn btn-success">
+            <i class="bi bi-person-plus ms-1"></i>افزودن کاربر جدید
+        </a>
+    </div>
+</div>
+
+<!-- Stats -->
+<div class="row g-3 mb-4 animate-fade-in">
+    <div class="col-md-3 col-sm-6">
+        <div class="stat-card bg-gradient-primary">
+            <i class="bi bi-people stat-icon"></i>
+            <div class="stat-number">@Model.Count()</div>
+            <div class="stat-label">کل کاربران</div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="stat-card bg-gradient-success">
+            <i class="bi bi-person-check stat-icon"></i>
+            <div class="stat-number">@Model.Count(u => u.IsActive)</div>
+            <div class="stat-label">فعال</div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="stat-card bg-gradient-warning">
+            <i class="bi bi-person-dash stat-icon"></i>
+            <div class="stat-number">@Model.Count(u => !u.IsActive)</div>
+            <div class="stat-label">غیرفعال</div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="stat-card bg-gradient-info">
+            <i class="bi bi-shield stat-icon"></i>
+            <div class="stat-number">@userRoles.Values.Count(r => r == "مدیر فناوری")</div>
+            <div class="stat-label">مدیر فناوری</div>
+        </div>
+    </div>
+</div>
+
+<!-- Users Table -->
+<div class="card animate-fade-in">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>نام کاربری</th>
+                        <th>نام و نام خانوادگی</th>
+                        <th>نقش</th>
+                        <th>شعبه</th>
+                        <th>وضعیت</th>
+                        <th>عملیات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in Model)
+                    {
+                        <tr class="@(user.IsActive ? "" : "table-secondary")">
+                            <td><strong>@user.UserName</strong></td>
+                            <td>@user.FullName</td>
+                            <td>
+                                @{
+                                    var roleDisplay = userRoles.TryGetValue(user.Id, out var rn) ? rn : "";
+                                    var badgeClass = userRoles.TryGetValue(user.Id, out var roleKey) ? roleKey switch
+                                    {
+                                        "IT" => "bg-primary",
+                                        "ErshadManager" => "bg-info",
+                                        "OfficeManager" => "bg-warning text-dark",
+                                        "BranchUser" => "bg-success",
+                                        _ => "bg-secondary"
+                                    } : "bg-secondary";
+                                }
+                                <span class="badge @badgeClass">@roleDisplay</span>
+                            </td>
+                            <td>@(user.Branch?.Name ?? "—")</td>
+                            <td>
+                                @if (user.IsActive)
+                                {
+                                    <span class="badge bg-success">
+                                        <i class="bi bi-check-circle ms-1"></i>فعال
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger">
+                                        <i class="bi bi-x-circle ms-1"></i>غیرفعال
+                                    </span>
+                                }
+                            </td>
+                            <td>
+                                <div class="d-flex gap-1 flex-wrap">
+                                    <a asp-action="Edit" asp-route-id="@user.Id" class="btn btn-sm btn-outline-primary" title="ویرایش">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <form asp-action="ToggleActive" asp-route-id="@user.Id" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-outline-@(user.IsActive ? "warning" : "success")" title="@(user.IsActive ? "غیرفعال کردن" : "فعال کردن")">
+                                            <i class="bi bi-@(user.IsActive ? "pause-circle" : "play-circle")"></i>
+                                        </button>
+                                    </form>
+                                    <form asp-action="ResetPassword" asp-route-id="@user.Id" method="post" class="d-inline"
+                                          onclick="return confirm('آیا رمز عبور این کاربر به Admin@123 بازنشانی شود؟')">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-outline-info" title="بازنشانی رمز عبور">
+                                            <i class="bi bi-key"></i>
+                                        </button>
+                                    </form>
+                                    <form asp-action="Delete" asp-route-id="@user.Id" method="post" class="d-inline"
+                                          onclick="return confirm('آیا از حذف کاربر «@user.FullName» اطمینان دارید؟')">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="حذف">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        @if (!Model.Any())
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-people fs-1 text-muted"></i>
+                <p class="text-muted mt-3">کاربری یافت نشد.</p>
+            </div>
+        }
+    </div>
+</div>

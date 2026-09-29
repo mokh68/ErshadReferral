@@ -1,0 +1,132 @@
+@{
+    ViewData["Title"] = "داشبورد";
+}
+
+<div class="page-header animate-fade-in">
+    <h4><i class="bi bi-speedometer2 ms-2"></i>داشبورد مدیریتی</h4>
+</div>
+
+<div class="row g-4 mb-4 animate-fade-in">
+    <div class="col-md-3 col-sm-6">
+        <div class="stat-card bg-gradient-primary">
+            <i class="bi bi-folder2-open stat-icon"></i>
+            <div class="stat-number">@ViewBag.TotalReferrals</div>
+            <div class="stat-label">کل ارجاعات</div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="stat-card bg-gradient-info">
+            <i class="bi bi-calendar-check stat-icon"></i>
+            <div class="stat-number">@ViewBag.TodayReferrals</div>
+            <div class="stat-label">ارجاعات امروز</div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="stat-card bg-gradient-warning">
+            <i class="bi bi-clock-history stat-icon"></i>
+            <div class="stat-number">@ViewBag.OpenReferrals</div>
+            <div class="stat-label">ارجاعات باز</div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="stat-card bg-gradient-success">
+            <i class="bi bi-check-circle stat-icon"></i>
+            <div class="stat-number">@ViewBag.ClosedReferrals</div>
+            <div class="stat-label">ارجاعات مختومه</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 animate-fade-in">
+    <!-- Quick Actions -->
+    <div class="@(User.IsInRole(AppRoles.IT) ? "col-md-6" : "col-md-8 mx-auto")">
+        <div class="card h-100">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-lightning-charge ms-2 text-warning"></i>دسترسی سریع</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-3">
+                    <a asp-controller="Referrals" asp-action="Index" class="quick-action-btn">
+                        <i class="bi bi-folder2-open"></i>
+                        <div>
+                            <div class="fw-semibold">مشاهده ارجاعات</div>
+                            <small class="text-muted">لیست تمام ارجاعات ثبت شده</small>
+                        </div>
+                    </a>
+                    @if (User.IsInRole(AppRoles.IT) || User.IsInRole(AppRoles.ErshadManager) || User.IsInRole(AppRoles.OfficeManager))
+                    {
+                        <a asp-controller="Referrals" asp-action="Create" class="quick-action-btn">
+                            <i class="bi bi-plus-circle"></i>
+                            <div>
+                                <div class="fw-semibold">ثبت ارجاع جدید</div>
+                                <small class="text-muted">ایجاد ارجاع جدید برای شعبه</small>
+                            </div>
+                        </a>
+                    }
+                    @if (User.IsInRole(AppRoles.IT) || User.IsInRole(AppRoles.ErshadManager))
+                    {
+                        <a asp-controller="Reports" asp-action="Index" class="quick-action-btn">
+                            <i class="bi bi-bar-chart-line"></i>
+                            <div>
+                                <div class="fw-semibold">گزارش‌گیری</div>
+                                <small class="text-muted">مشاهده گزارش‌های آماری</small>
+                            </div>
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- System Info (IT only) -->
+    @if (User.IsInRole(AppRoles.IT))
+    {
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-info-circle ms-2 text-primary"></i>اطلاعات سامانه</h6>
+            </div>
+            <div class="card-body">
+                <div class="row text-center g-2">
+                    <div class="col-6">
+                        <a asp-controller="Courts" asp-action="Index" class="text-decoration-none" style="display:block;">
+                            <div class="p-3 rounded-3" style="background: linear-gradient(135deg, #e3f2fd, #f5f5f5);">
+                                <i class="bi bi-building fs-2 text-primary"></i>
+                                <div class="mt-2 fw-semibold">دادگاه‌ها</div>
+                                <small class="text-muted">مدیریت اطلاعات دادگاه‌ها</small>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <a asp-controller="Branches" asp-action="Index" class="text-decoration-none" style="display:block;">
+                            <div class="p-3 rounded-3" style="background: linear-gradient(135deg, #e8f5e9, #f5f5f5);">
+                                <i class="bi bi-door-open fs-2 text-success"></i>
+                                <div class="mt-2 fw-semibold">شعب</div>
+                                <small class="text-muted">مدیریت اطلاعات شعب</small>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <a asp-controller="Users" asp-action="Index" class="text-decoration-none" style="display:block;">
+                            <div class="p-3 rounded-3" style="background: linear-gradient(135deg, #fff3e0, #f5f5f5);">
+                                <i class="bi bi-people fs-2 text-warning"></i>
+                                <div class="mt-2 fw-semibold">کاربران</div>
+                                <small class="text-muted">مدیریت کاربران سامانه</small>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <a asp-controller="Reports" asp-action="Index" class="text-decoration-none" style="display:block;">
+                            <div class="p-3 rounded-3" style="background: linear-gradient(135deg, #fce4ec, #f5f5f5);">
+                                <i class="bi bi-graph-up fs-2 text-danger"></i>
+                                <div class="mt-2 fw-semibold">گزارش‌ها</div>
+                                <small class="text-muted">مشاهده گزارش‌های آماری</small>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    }
+</div>
