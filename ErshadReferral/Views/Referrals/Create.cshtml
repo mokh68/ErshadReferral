@@ -102,6 +102,7 @@
                             <select id="BranchId" asp-for="BranchId" asp-items="ViewBag.Branches" class="form-select" disabled tabindex="2">
                                 <option value="">-- انتخاب شعبه --</option>
                             </select>
+                            <div id="branchDailyCount" class="form-text mt-2" aria-live="polite"></div>
                             <span asp-validation-for="BranchId" class="text-danger"></span>
                         </div>
                     </div>
@@ -144,9 +145,33 @@
     <partial name="_ValidationScriptsPartial" />
     <script>
         (function(){
-                var nationalInput = document.getElementById('nationalCodeInput');
+            var nationalInput = document.getElementById('nationalCodeInput');
             var resultDiv = document.getElementById('scanResult');
             var branchSelect = document.getElementById('BranchId');
+            var branchDailyCount = document.getElementById('branchDailyCount');
+
+            if (branchSelect && branchDailyCount) {
+                branchSelect.addEventListener('change', function(){
+                    var branchId = branchSelect.value;
+                    if (!branchId) {
+                        branchDailyCount.textContent = '';
+                        return;
+                    }
+
+                    branchDailyCount.textContent = 'در حال دریافت تعداد ارجاعات امروز...';
+                    fetch('@Url.Action("TodayCountForBranch", "Referrals")?branchId=' + encodeURIComponent(branchId))
+                        .then(function(response){
+                            if (!response.ok) throw new Error('Request failed');
+                            return response.json();
+                        })
+                        .then(function(data){
+                            branchDailyCount.textContent = 'تعداد ارجاعات امروز این شعبه: ' + data.count;
+                        })
+                        .catch(function(){
+                            branchDailyCount.textContent = 'دریافت تعداد ارجاعات ممکن نشد';
+                        });
+                });
+            }
 
             var firstInput = document.querySelector('[name="FirstName"]');
             var lastInput = document.querySelector('[name="LastName"]');

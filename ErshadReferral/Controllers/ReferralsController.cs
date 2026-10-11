@@ -135,6 +135,19 @@ public class ReferralsController : Controller
         });
     }
 
+    [HttpGet]
+    [Authorize(Roles = $"{AppRoles.IT},{AppRoles.ErshadManager},{AppRoles.OfficeManager}")]
+    public async Task<IActionResult> TodayCountForBranch(int branchId)
+    {
+        var today = DateTime.Today;
+        var count = await _db.Referrals.CountAsync(r =>
+            r.BranchId == branchId &&
+            r.ReferralDate >= today &&
+            r.ReferralDate < today.AddDays(1));
+
+        return Json(new { count });
+    }
+
     [HttpPost]
     [ValidateAntiForgeryToken]
     [Authorize(Roles = $"{AppRoles.IT},{AppRoles.ErshadManager},{AppRoles.OfficeManager}")]
