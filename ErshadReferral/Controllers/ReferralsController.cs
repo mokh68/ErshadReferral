@@ -210,7 +210,7 @@ public class ReferralsController : Controller
         await _referralService.CreateAsync(referral, user?.Id, user?.FullName, roleName);
 
         TempData["Success"] = $"ارجاع با شماره {referral.ReferralNumber} ثبت شد";
-        return RedirectToAction(nameof(Receipt), new { id = referral.Id });
+        return RedirectToAction(nameof(Index));
     }
 
     public async Task<IActionResult> Details(int id)
