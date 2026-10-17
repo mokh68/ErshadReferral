@@ -51,5 +51,10 @@ public class Referral
     [Display(Name = "نام ثبت‌کننده")]
     public string? CreatedByUserName { get; set; }
 
+    public bool IsVisibleToBranches { get; set; } = true;
+
+    [MaxLength(64)]
+    public string? ImportFingerprint { get; set; }
+
     public ICollection<ReferralStatusHistory> StatusHistories { get; set; } = new List<ReferralStatusHistory>();
 }

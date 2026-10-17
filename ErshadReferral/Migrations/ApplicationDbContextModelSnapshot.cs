@@ -13,6 +13,11 @@ namespace ErshadReferral.Migrations
     [DbContext(typeof(ApplicationDbContext))]
     partial class ApplicationDbContextModelSnapshot : ModelSnapshot
     {
+        internal static void BuildLatestModel(ModelBuilder modelBuilder)
+        {
+            new ApplicationDbContextModelSnapshot().BuildModel(modelBuilder);
+        }
+
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
@@ -193,8 +198,8 @@ namespace ErshadReferral.Migrations
 
                     b.Property<string>("NationalCode")
                         .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<string>("Notes")
                         .HasMaxLength(500)
@@ -226,6 +231,13 @@ namespace ErshadReferral.Migrations
                     b.Property<string>("CreatedByUserName")
                         .HasMaxLength(150)
                         .HasColumnType("nvarchar(150)");
+
+                    b.Property<string>("ImportFingerprint")
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<bool>("IsVisibleToBranches")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Description")
                         .HasMaxLength(1000)
@@ -261,7 +273,115 @@ namespace ErshadReferral.Migrations
                     b.HasIndex("ReferralNumber")
                         .IsUnique();
 
+                    b.HasIndex("ImportFingerprint")
+                        .IsUnique()
+                        .HasFilter("[ImportFingerprint] IS NOT NULL");
+
                     b.ToTable("Referrals");
+                });
+
+            modelBuilder.Entity("ErshadReferral.Models.ReferralImportAlias", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("NormalizedSourceValue")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<string>("SourceValue")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<int?>("TargetBranchId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TargetSubject")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TargetBranchId");
+
+                    b.HasIndex("Type", "NormalizedSourceValue")
+                        .IsUnique();
+
+                    b.ToTable("ReferralImportAliases");
+                });
+
+            modelBuilder.Entity("ErshadReferral.Models.ReferralImportBatch", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasMaxLength(260)
+                        .HasColumnType("nvarchar(260)");
+
+                    b.Property<string>("FileSha256")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<int>("ImportedRows")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("ImportedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("InvalidNationalCodeRows")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MappedBranchRows")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MappedSubjectRows")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MissingLastNameRows")
+                        .HasColumnType("int");
+
+                    b.Property<int>("NewPeople")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ReusedPeople")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SkippedDuplicateRows")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TotalRows")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UnmappedBranchRows")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UnmappedSubjectRows")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UploadedByUserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FileSha256")
+                        .IsUnique();
+
+                    b.ToTable("ReferralImportBatches");
                 });
 
             modelBuilder.Entity("ErshadReferral.Models.ReferralStatusHistory", b =>
@@ -532,6 +652,16 @@ namespace ErshadReferral.Migrations
                     b.Navigation("Branch");
 
                     b.Navigation("Person");
+                });
+
+            modelBuilder.Entity("ErshadReferral.Models.ReferralImportAlias", b =>
+                {
+                    b.HasOne("ErshadReferral.Models.Branch", "TargetBranch")
+                        .WithMany()
+                        .HasForeignKey("TargetBranchId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("TargetBranch");
                 });
 
             modelBuilder.Entity("ErshadReferral.Models.ReferralStatusHistory", b =>

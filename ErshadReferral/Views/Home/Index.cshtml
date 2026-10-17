@@ -65,6 +65,13 @@
                     }
                     @if (User.IsInRole(AppRoles.IT) || User.IsInRole(AppRoles.ErshadManager))
                     {
+                        <a asp-controller="ReferralImports" asp-action="Index" class="quick-action-btn">
+                            <i class="bi bi-file-earmark-spreadsheet"></i>
+                            <div>
+                                <div class="fw-semibold">ایمپورت روزانهٔ اکسل</div>
+                                <small class="text-muted">ثبت ارجاع‌ها از فایل نوبت‌ها</small>
+                            </div>
+                        </a>
                         <a asp-controller="Reports" asp-action="Index" class="quick-action-btn">
                             <i class="bi bi-bar-chart-line"></i>
                             <div>

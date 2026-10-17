@@ -17,7 +17,7 @@ public class Person
     public string LastName { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "کد ملی الزامی است")]
-    [StringLength(10, MinimumLength = 10, ErrorMessage = "کد ملی باید ۱۰ رقم باشد")]
+    [MaxLength(20)]
     [RegularExpression(@"^\d{10}$", ErrorMessage = "کد ملی فقط شامل ارقام است")]
     [Display(Name = "کد ملی")]
     public string NationalCode { get; set; } = string.Empty;

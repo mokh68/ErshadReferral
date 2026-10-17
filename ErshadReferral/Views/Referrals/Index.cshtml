@@ -13,6 +13,12 @@
                 <i class="bi bi-plus-circle ms-1"></i>ثبت ارجاع جدید
             </a>
         }
+        @if (User.IsInRole(AppRoles.IT) || User.IsInRole(AppRoles.ErshadManager))
+        {
+            <a asp-controller="ReferralImports" asp-action="Index" class="btn btn-outline-primary">
+                <i class="bi bi-file-earmark-spreadsheet ms-1"></i>ایمپورت اکسل
+            </a>
+        }
     </div>
 </div>
 

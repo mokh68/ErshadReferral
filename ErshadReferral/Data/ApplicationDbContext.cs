@@ -16,6 +16,8 @@ public class ApplicationDbContext : IdentityDbContext<AppUser>
     public DbSet<Referral> Referrals => Set<Referral>();
     public DbSet<ReferralStatusHistory> ReferralStatusHistories => Set<ReferralStatusHistory>();
     public DbSet<VisitorEntry> VisitorEntries => Set<VisitorEntry>();
+    public DbSet<ReferralImportBatch> ReferralImportBatches => Set<ReferralImportBatch>();
+    public DbSet<ReferralImportAlias> ReferralImportAliases => Set<ReferralImportAlias>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -31,6 +33,25 @@ public class ApplicationDbContext : IdentityDbContext<AppUser>
 
         builder.Entity<Referral>()
             .HasIndex(r => r.ReferralDate);
+
+        builder.Entity<Referral>()
+            .HasIndex(r => r.ImportFingerprint)
+            .IsUnique()
+            .HasFilter("[ImportFingerprint] IS NOT NULL");
+
+        builder.Entity<ReferralImportBatch>()
+            .HasIndex(b => b.FileSha256)
+            .IsUnique();
+
+        builder.Entity<ReferralImportAlias>()
+            .HasIndex(a => new { a.Type, a.NormalizedSourceValue })
+            .IsUnique();
+
+        builder.Entity<ReferralImportAlias>()
+            .HasOne(a => a.TargetBranch)
+            .WithMany()
+            .HasForeignKey(a => a.TargetBranchId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.Entity<Branch>()
             .HasOne(b => b.Court)

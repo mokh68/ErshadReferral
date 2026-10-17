@@ -199,21 +199,21 @@ public class VisitorEntriesController : Controller
         var waitingReferrals = await _db.Referrals
             .Include(r => r.Person)
             .Include(r => r.Branch)
-            .Where(r => r.BranchId == branchId && r.Status == ReferralStatus.Referred)
+            .Where(r => r.BranchId == branchId && r.IsVisibleToBranches && r.Status == ReferralStatus.Referred)
             .OrderByDescending(r => r.ReferralDate)
             .ToListAsync();
 
         var activeReferrals = await _db.Referrals
             .Include(r => r.Person)
             .Include(r => r.Branch)
-            .Where(r => r.BranchId == branchId && (r.Status == ReferralStatus.Received || r.Status == ReferralStatus.InProgress))
+            .Where(r => r.BranchId == branchId && r.IsVisibleToBranches && (r.Status == ReferralStatus.Received || r.Status == ReferralStatus.InProgress))
             .OrderByDescending(r => r.ReferralDate)
             .ToListAsync();
 
         var closedReferrals = await _db.Referrals
             .Include(r => r.Person)
             .Include(r => r.Branch)
-            .Where(r => r.BranchId == branchId && (r.Status == ReferralStatus.Closed || r.Status == ReferralStatus.ReturnedToErshad))
+            .Where(r => r.BranchId == branchId && r.IsVisibleToBranches && (r.Status == ReferralStatus.Closed || r.Status == ReferralStatus.ReturnedToErshad))
             .OrderByDescending(r => r.ReferralDate)
             .Take(20)
             .ToListAsync();
@@ -251,6 +251,9 @@ public class VisitorEntriesController : Controller
         var referral = await _db.Referrals.FindAsync(id);
         if (referral == null) return NotFound();
 
+        if ((User.IsInRole(AppRoles.OfficeManager) || User.IsInRole(AppRoles.BranchUser)) && !referral.IsVisibleToBranches)
+            return NotFound();
+
         if (User.IsInRole(AppRoles.OfficeManager) || User.IsInRole(AppRoles.BranchUser))
         {
             var user = await _userManager.GetUserAsync(User);
@@ -282,6 +285,9 @@ public class VisitorEntriesController : Controller
     {
         var referral = await _db.Referrals.FindAsync(id);
         if (referral == null) return NotFound();
+
+        if ((User.IsInRole(AppRoles.OfficeManager) || User.IsInRole(AppRoles.BranchUser)) && !referral.IsVisibleToBranches)
+            return NotFound();
 
         if (User.IsInRole(AppRoles.OfficeManager) || User.IsInRole(AppRoles.BranchUser))
         {
@@ -327,6 +333,7 @@ public class VisitorEntriesController : Controller
 
     // ==================== Entry Controller Dashboard ====================
     // Dashboard for EntryController: shows today's pending referrals + barcode lookup
+    [Authorize(Roles = $"{AppRoles.IT},{AppRoles.ErshadManager},{AppRoles.EntryController}")]
     public async Task<IActionResult> EntryControllerDashboard()
     {
         var today = DateTime.Today;
@@ -357,6 +364,7 @@ public class VisitorEntriesController : Controller
     // AJAX: Look up person by national code and auto-register entry
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = $"{AppRoles.IT},{AppRoles.ErshadManager},{AppRoles.EntryController}")]
     public async Task<IActionResult> LookupByNationalCode(string nationalCode)
     {
         if (string.IsNullOrWhiteSpace(nationalCode) || nationalCode.Length != 10)

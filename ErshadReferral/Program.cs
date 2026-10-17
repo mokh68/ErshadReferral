@@ -28,6 +28,7 @@ builder.Services.ConfigureApplicationCookie(options =>
 });
 
 builder.Services.AddScoped<ReferralService>();
+builder.Services.AddScoped<ReferralExcelImportService>();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();

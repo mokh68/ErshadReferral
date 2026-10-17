@@ -53,6 +53,9 @@ public class ReferralsController : Controller
             .Include(r => r.Branch)!.ThenInclude(b => b!.Court)
             .AsQueryable();
 
+        if (User.IsInRole(AppRoles.BranchUser) || User.IsInRole(AppRoles.OfficeManager))
+            query = query.Where(r => r.IsVisibleToBranches);
+
         if (User.IsInRole(AppRoles.BranchUser))
         {
             var user = await _userManager.GetUserAsync(User);
@@ -140,10 +143,13 @@ public class ReferralsController : Controller
     public async Task<IActionResult> TodayCountForBranch(int branchId)
     {
         var today = DateTime.Today;
-        var count = await _db.Referrals.CountAsync(r =>
+        var query = _db.Referrals.Where(r =>
             r.BranchId == branchId &&
             r.ReferralDate >= today &&
             r.ReferralDate < today.AddDays(1));
+        if (User.IsInRole(AppRoles.OfficeManager))
+            query = query.Where(r => r.IsVisibleToBranches);
+        var count = await query.CountAsync();
 
         return Json(new { count });
     }
@@ -223,6 +229,9 @@ public class ReferralsController : Controller
 
         if (referral == null) return NotFound();
 
+        if ((User.IsInRole(AppRoles.BranchUser) || User.IsInRole(AppRoles.OfficeManager)) && !referral.IsVisibleToBranches)
+            return NotFound();
+
         if (User.IsInRole(AppRoles.BranchUser))
         {
             var user = await _userManager.GetUserAsync(User);
@@ -242,6 +251,9 @@ public class ReferralsController : Controller
 
         if (referral == null) return NotFound();
 
+        if ((User.IsInRole(AppRoles.BranchUser) || User.IsInRole(AppRoles.OfficeManager)) && !referral.IsVisibleToBranches)
+            return NotFound();
+
         if (User.IsInRole(AppRoles.BranchUser))
         {
             var user = await _userManager.GetUserAsync(User);
@@ -259,6 +271,9 @@ public class ReferralsController : Controller
             .FirstOrDefaultAsync(r => r.Id == id);
 
         if (referral == null) return NotFound();
+
+        if ((User.IsInRole(AppRoles.BranchUser) || User.IsInRole(AppRoles.OfficeManager)) && !referral.IsVisibleToBranches)
+            return NotFound();
 
         if (User.IsInRole(AppRoles.BranchUser))
         {
@@ -278,6 +293,9 @@ public class ReferralsController : Controller
 
         if (referral == null) return NotFound();
 
+        if ((User.IsInRole(AppRoles.BranchUser) || User.IsInRole(AppRoles.OfficeManager)) && !referral.IsVisibleToBranches)
+            return NotFound();
+
         if (User.IsInRole(AppRoles.BranchUser))
         {
             var user = await _userManager.GetUserAsync(User);
@@ -293,6 +311,9 @@ public class ReferralsController : Controller
     {
         var referral = await _db.Referrals.FindAsync(model.ReferralId);
         if (referral == null) return NotFound();
+
+        if ((User.IsInRole(AppRoles.BranchUser) || User.IsInRole(AppRoles.OfficeManager)) && !referral.IsVisibleToBranches)
+            return NotFound();
 
         var user = await _userManager.GetUserAsync(User);
         if (user == null) return Forbid();
