@@ -285,7 +285,9 @@
                 })
                 .then(function(response) { return response.json(); })
                 .then(function(data) {
-                    if (data.success) {
+                    if (data.alreadyRegistered) {
+                        showResult('success', '<i class="bi bi-check-circle-fill ms-1"></i>' + data.message);
+                    } else if (data.success) {
                         showResult('success', '<i class="bi bi-check-circle-fill ms-1"></i>' + data.message + '<br><small>' + data.branches + '</small>');
                         // Remove the row from table
                         var row = document.querySelector('tr[data-national-code="' + code + '"]');

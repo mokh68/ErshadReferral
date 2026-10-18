@@ -398,7 +398,7 @@ public class VisitorEntriesController : Controller
                 .ToListAsync();
 
             if (alreadyArrived.Any())
-                return Json(new { success = false, message = $"حضور {person.FullName} امروز قبلاً ثبت شده است" });
+                return Json(new { success = false, alreadyRegistered = true, message = $"حضور {person.FullName} قبلاً ثبت شده است" });
 
             return Json(new { success = false, message = $"هیچ ارجاع منتظر ورودی برای {person.FullName} یافت نشد" });
         }
